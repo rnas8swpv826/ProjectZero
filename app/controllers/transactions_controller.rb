@@ -1,7 +1,7 @@
 class TransactionsController < ApplicationController
     def index
-        transactions = Transaction.all
-        render json: transactions
+        @transactions = Transaction.all
+        # render json: transactions
     end
     
     def show
