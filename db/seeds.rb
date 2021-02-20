@@ -5,3 +5,15 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+Transaction.create(
+  payee: 'Costco',
+  description: 'Croissants',
+  amount_out: 13.99
+)
+
+Transaction.create(
+  payee: 'Farm Boy',
+  description: 'Apples',
+  amount_out: 4
+)
