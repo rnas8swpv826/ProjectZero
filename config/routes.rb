@@ -3,4 +3,5 @@ Rails.application.routes.draw do
     resources :transactions
   end
   root 'homepage#index' # No "yay you're on rails" page
+  get '/*path' => 'homepage#index'
 end
