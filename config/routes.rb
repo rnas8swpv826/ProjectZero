@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
-  root 'homepage#index'
-  # For details on the DSL available within this file, see https://guides.rubyonrails.org/routing.html
+  namespace :api do
+    resources :transactions
+  end
+  root 'homepage#index' # No "yay you're on rails" page
 end
