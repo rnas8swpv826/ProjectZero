@@ -2,8 +2,8 @@ import React from 'react';
 import {Link} from 'react-router-dom';
 
 export default () => (
-  <div>
+  <div className='container'>
     <h1>Hello World from react</h1>
-    <Link to='/transactions'>See Transactions</Link>
+    <Link to='/transactions' className='btn btn-primary'>See Transactions</Link>
   </div>
 );
