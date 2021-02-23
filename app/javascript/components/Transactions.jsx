@@ -4,7 +4,8 @@ class Transactions extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      transactions: []
+      transactions: [],
+      isLoaded: false
     };
   }
 
@@ -19,24 +20,31 @@ class Transactions extends React.Component {
           throw new Error("Network response error.");
         }
       })
-      .then(response => this.setState({transactions: response}))
+      .then(data => this.setState({transactions: data, isLoaded: true}))
       .catch(() => this.props.history.push("/")); // If an error is thrown, go back to homepage
   }
 
   render() {
-    const {transactions} = this.state; // Same as const transactions = this.state.transactions;
+    const {transactions, isLoaded} = this.state; // Same as const transactions = this.state.transactions;
     const allTransactions = transactions.map((transaction, index) => (
       <div key={index}>
         <span>{transaction.description}</span>
       </div>
     ));
     const noTransaction = (
-      <h3>No transactions to show.</h3>
+      <span>No transactions to show.</span>
+    );
+    const loadingTransactions = (
+      <span>Transactions are loading.</span>
     );
     return (
       <div className="container">
         <h1>Transactions</h1>
-        {transactions.length > 0 ? allTransactions : noTransaction}
+        {isLoaded ?
+          <div>
+            {(transactions.length > 0) ? allTransactions : noTransaction}
+          </div>
+         : loadingTransactions}
       </div>
     );
   }
