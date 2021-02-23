@@ -26,11 +26,23 @@ class Transactions extends React.Component {
 
   render() {
     const {transactions, isLoaded} = this.state; // Same as const transactions = this.state.transactions;
-    const allTransactions = transactions.map((transaction, index) => (
-      <div key={index}>
-        <span>{transaction.description}</span>
-      </div>
+    const transactionsRows = transactions.map((transaction) => (
+      <tr>
+        <td>{transaction.payee}</td>
+        <td>{transaction.description}</td>
+        <td>{transaction.amount_out}</td>
+      </tr>
     ));
+    const transactionsTable = (
+      <table>
+        <tr>
+          <th>Payee</th>
+          <th>Description</th>
+          <th>Amount Out</th>
+        </tr>
+        {transactionsRows}
+      </table>
+    )
     const noTransaction = (
       <span>No transactions to show.</span>
     );
@@ -42,7 +54,7 @@ class Transactions extends React.Component {
         <h1>Transactions</h1>
         {isLoaded ?
           <div>
-            {(transactions.length > 0) ? allTransactions : noTransaction}
+            {(transactions.length > 0) ? transactionsTable : noTransaction}
           </div>
          : loadingTransactions}
       </div>
