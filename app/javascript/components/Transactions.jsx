@@ -1,4 +1,5 @@
 import React from "react";
+import * as styles from "./styles.css";
 
 class Transactions extends React.Component {
   constructor(props) {
