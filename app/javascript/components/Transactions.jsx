@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from 'react-router-dom';
 import * as styles from "./styles.css";
 
 class Transactions extends React.Component {
@@ -57,6 +58,7 @@ class Transactions extends React.Component {
     return (
       <div className="container">
         <h1>Transactions</h1>
+        <Link to="/transaction" className="btn btn-link">Add Transaction</Link>
         {isLoaded ?
           <div>
             {(transactions.length > 0) ? transactionsTable : noTransaction}
