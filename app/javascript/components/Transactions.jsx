@@ -58,7 +58,7 @@ class Transactions extends React.Component {
     return (
       <div className="container">
         <h1>Transactions</h1>
-        <Link to="/transaction" className="btn btn-link">Add Transaction</Link>
+        <Link to="/transactions/new" className="btn btn-link">Add Transaction</Link>
         {isLoaded ?
           <div>
             {(transactions.length > 0) ? transactionsTable : noTransaction}

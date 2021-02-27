@@ -9,7 +9,7 @@ export default (
     <Switch>
       <Route path="/" exact component={Home} />
       <Route path="/transactions" exact component={Transactions} />
-      <Route path="/transaction" exact component={AddTransaction} />
+      <Route path="/transactions/new" exact component={AddTransaction} />
     </Switch>
   </Router> 
 );
