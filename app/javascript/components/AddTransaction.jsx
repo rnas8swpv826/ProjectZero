@@ -1,4 +1,5 @@
 import React from "react";
+import {Link} from "react-router-dom";
 
 class AddTransaction extends React.Component {
   constructor(props) {
@@ -43,6 +44,7 @@ class AddTransaction extends React.Component {
             </div>
 
             <button type="submit" className="btn btn-primary">Add Transaction</button>
+            <Link to="/transactions" className="btn btn-link">Back to Transactions</Link>
           </form>
         </div>
       </div>
