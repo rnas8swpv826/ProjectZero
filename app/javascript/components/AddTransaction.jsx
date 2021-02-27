@@ -15,6 +15,30 @@ class AddTransaction extends React.Component {
 
   onSubmit(event) {
     event.preventDefault();
+
+    const url = "/api/transactions";
+    const {payee, description, amount_out} = this.state;
+    const body = {payee, description, amount_out};
+    const token = document.querySelector("meta[name='csrf-token']").content;
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "X-CSRF-TOKEN": token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        else {
+          throw new Error("Network response error.");
+        }
+      })
+      .then(() => this.props.history.push("/transactions"))
+      .catch(() => this.props.history.push("/"));
   }
 
   onChange(event) {
