@@ -7,7 +7,9 @@ class AddTransaction extends React.Component {
     this.state = {
       payee: "",
       description: "",
-      amount_out: ""
+      amount_out: "",
+      payee_error: "",
+      amount_out_error: ""
     };
     this.onSubmit = this.onSubmit.bind(this);
     this.onChange = this.onChange.bind(this);
@@ -34,11 +36,21 @@ class AddTransaction extends React.Component {
           return response.json();
         }
         else {
-          throw new Error("Network response error.");
+          throw response;
         }
       })
       .then(() => this.props.history.push("/transactions"))
-      .catch(() => this.props.history.push("/"));
+      .catch((error) => {
+        error.json().then((body) => {
+          const keys = Object.keys(body.data);
+          if (keys.includes("payee")) {
+            this.setState({payee_error: `Payee ${body.data.payee}`});
+          }
+          if (keys.includes("amount_out")) {
+            this.setState({amount_out_error: `Amount out ${body.data.amount_out}`});
+          }
+        });
+      });
   }
 
   onChange(event) {
@@ -55,6 +67,7 @@ class AddTransaction extends React.Component {
             <div className="form-group">
               <label htmlFor="payee_input">Payee</label>
               <input type="text" name="payee" id="payee_input" className="form-control" onChange={this.onChange} />
+              <span className="text-danger">{this.state.payee_error}</span>
             </div>
 
             <div className="form-group">
@@ -65,6 +78,7 @@ class AddTransaction extends React.Component {
             <div className="form-group">
               <label htmlFor="amount_out_input">Amount Out</label>
               <input type="text" name="amount_out" id="amount_out_input" className="form-control" onChange={this.onChange} />
+              <span className="text-danger">{this.state.amount_out_error}</span>
             </div>
 
             <button type="submit" className="btn btn-primary">Add Transaction</button>
