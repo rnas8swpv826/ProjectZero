@@ -1,5 +1,4 @@
 import React from "react";
-import {Link} from 'react-router-dom';
 import * as styles from "./styles.css";
 
 class Transactions extends React.Component {
@@ -7,9 +6,12 @@ class Transactions extends React.Component {
     super(props);
     this.state = {
       transactions: [],
-      isLoaded: false
+      isLoaded: false,
+      addingTransaction: false
     };
     this.loadTransactions = this.loadTransactions.bind(this);
+    this.addTransactionClick = this.addTransactionClick.bind(this);
+    this.cancelClick = this.cancelClick.bind(this);
   }
 
   loadTransactions() {
@@ -31,8 +33,16 @@ class Transactions extends React.Component {
     this.loadTransactions();
   }
 
+  addTransactionClick() {
+    this.setState({addingTransaction: true});
+  }
+
+  cancelClick() {
+    this.setState({addingTransaction: false});
+  }
+
   render() {
-    const {transactions, isLoaded} = this.state; // Same as const transactions = this.state.transactions;
+    const {transactions, isLoaded, addingTransaction} = this.state; // Same as const transactions = this.state.transactions (destructuring)
     const transactionsRows = transactions.map((transaction, index) => (
       <tr key={index}>
         <td>{transaction.payee}</td>
@@ -40,6 +50,17 @@ class Transactions extends React.Component {
         <td>{transaction.amount_out}</td>
       </tr>
     ));
+    const addTransactionRow = (
+      <tr>
+        <td><input type="text" /></td>
+        <td><input type="text" /></td>
+        <td><input type="text" /></td>
+        <td>
+          <button className="btn btn-primary btn-sm mr-1">Save</button>
+          <button className="btn btn-secondary btn-sm" onClick={this.cancelClick}>Cancel</button>
+        </td>
+      </tr>
+    );
     const transactionsTable = (
       <table>
         <thead>
@@ -51,6 +72,9 @@ class Transactions extends React.Component {
         </thead>
         <tbody>
           {transactionsRows}
+          {addingTransaction &&
+            addTransactionRow
+          }
         </tbody>
       </table>
     )
@@ -64,7 +88,7 @@ class Transactions extends React.Component {
     return (
       <div className="container">
         <h1>Transactions</h1>
-        <Link to="/transactions/new" className="btn btn-primary mb-3">Add Transaction</Link>
+        <button className="btn btn-primary mb-3" onClick={this.addTransactionClick}>Add Transaction</button>   
         {isLoaded ?
           <div>
             {(transactions.length > 0) ? transactionsTable : noTransaction}
