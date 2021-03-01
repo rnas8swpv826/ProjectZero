@@ -9,9 +9,10 @@ class Transactions extends React.Component {
       transactions: [],
       isLoaded: false
     };
+    this.loadTransactions = this.loadTransactions.bind(this);
   }
 
-  componentDidMount() {
+  loadTransactions() {
     const url = "/api/transactions";
     fetch(url)
       .then(response => {
@@ -22,8 +23,12 @@ class Transactions extends React.Component {
           throw new Error("Network response error.");
         }
       })
-      .then(data => this.setState({transactions: data, isLoaded: true}))
+      .then(data => this.setState({ transactions: data, isLoaded: true }))
       .catch(() => this.props.history.push("/")); // If an error is thrown, go back to homepage
+  }
+
+  componentDidMount() {
+    this.loadTransactions();
   }
 
   render() {
