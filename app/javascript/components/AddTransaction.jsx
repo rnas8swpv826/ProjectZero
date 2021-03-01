@@ -1,5 +1,5 @@
 import React from "react";
-import {Link} from "react-router-dom";
+import { Link } from "react-router-dom";
 
 class AddTransaction extends React.Component {
   constructor(props) {
@@ -19,8 +19,8 @@ class AddTransaction extends React.Component {
     event.preventDefault();
 
     const url = "/api/transactions";
-    const {payee, description, amount_out} = this.state;
-    const body = {payee, description, amount_out};
+    const { payee, description, amount_out } = this.state;
+    const body = { payee, description, amount_out };
     const token = document.querySelector("meta[name='csrf-token']").content;
 
     fetch(url, {
@@ -44,17 +44,17 @@ class AddTransaction extends React.Component {
         error.json().then((body) => {
           const keys = Object.keys(body.data);
           if (keys.includes("payee")) {
-            this.setState({payee_error: `Payee ${body.data.payee}`});
+            this.setState({ payee_error: `Payee ${body.data.payee}` });
           }
           if (keys.includes("amount_out")) {
-            this.setState({amount_out_error: `Amount out ${body.data.amount_out}`});
+            this.setState({ amount_out_error: `Amount out ${body.data.amount_out}` });
           }
         });
       });
   }
 
   onChange(event) {
-    this.setState({[event.target.name]: event.target.value});
+    this.setState({ [event.target.name]: event.target.value });
   }
 
   render() {

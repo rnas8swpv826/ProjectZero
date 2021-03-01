@@ -50,10 +50,10 @@ class Transactions extends React.Component {
       </table>
     )
     const noTransaction = (
-      <span>No transactions to show.</span>
+      <p>No transactions to show.</p>
     );
     const loadingTransactions = (
-      <span>Transactions are loading.</span>
+      <p>Transactions are loading.</p>
     );
     
     return (
