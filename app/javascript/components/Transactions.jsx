@@ -44,7 +44,7 @@ class Transactions extends React.Component {
   }
 
   cancelClick() {
-    this.setState({addingTransaction: false});
+    this.setState({addingTransaction: false, payee: "", description: "", amount_out: "", messages: []});
   }
 
   onSubmit(event) {
