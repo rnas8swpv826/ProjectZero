@@ -8,6 +8,7 @@ class Transactions extends React.Component {
       transactions: [],
       isLoaded: false,
       addingTransaction: false,
+      deletingTransactions: false,
       payee: "",
       description: "",
       amount_out: "",
@@ -15,8 +16,11 @@ class Transactions extends React.Component {
     };
     this.loadTransactions = this.loadTransactions.bind(this);
     this.addTransactionClick = this.addTransactionClick.bind(this);
-    this.cancelClick = this.cancelClick.bind(this);
-    this.onSubmit = this.onSubmit.bind(this);
+    this.deleteTransactionClick = this.deleteTransactionClick.bind(this);
+    this.addCancel = this.addCancel.bind(this);
+    this.addSave = this.addSave.bind(this);
+    this.deleteCancel = this.deleteCancel.bind(this);
+    this.deleteSave = this.deleteSave.bind(this);
     this.onChange = this.onChange.bind(this);
   }
 
@@ -40,14 +44,18 @@ class Transactions extends React.Component {
   }
 
   addTransactionClick() {
-    this.setState({addingTransaction: true});
+    this.setState({addingTransaction: true, deletingTransactions: false});
   }
 
-  cancelClick() {
+  deleteTransactionClick() {
+    this.setState({deletingTransactions: true, addingTransaction: false});
+  }
+
+  addCancel() {
     this.setState({addingTransaction: false, payee: "", description: "", amount_out: "", messages: []});
   }
 
-  onSubmit(event) {
+  addSave(event) {
     event.preventDefault();
 
     const url = "/api/transactions";
@@ -89,14 +97,24 @@ class Transactions extends React.Component {
       });
   }
 
+  deleteCancel() {
+    this.setState({deletingTransactions: false});
+  }
+
+  deleteSave() {
+    console.log("Hello");
+  }
+
   onChange(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
 
   render() {
-    const {transactions, isLoaded, addingTransaction, messages} = this.state; // Same as const transactions = this.state.transactions (destructuring)
+    const {transactions, isLoaded, addingTransaction, deletingTransactions, messages} = this.state; // Same as const transactions = this.state.transactions (destructuring)
     const transactionsRows = transactions.map((transaction, index) => (
       <tr key={index}>
+        {deletingTransactions &&
+          <td><input type="checkbox" /></td>}
         <td>{transaction.payee}</td>
         <td>{transaction.description}</td>
         <td>{transaction.amount_out}</td>
@@ -111,16 +129,24 @@ class Transactions extends React.Component {
     );
     const addButtonsAndErrors = (
       <div className="mt-2">
-        <button className="btn btn-primary btn-sm mr-1" onClick={this.onSubmit}>Save</button>
-        <button className="btn btn-secondary btn-sm" onClick={this.cancelClick}>Cancel</button>
+        <button className="btn btn-primary btn-sm mr-1" onClick={this.addSave}>Save</button>
+        <button className="btn btn-secondary btn-sm" onClick={this.addCancel}>Cancel</button>
         <span className="text-danger">{messages.join(". ")}</span>
       </div>
-    )
+    );
+    const deleteButtons =(
+      <div className="mt-2">
+        <button className="btn btn-primary btn-sm mr-1" onClick={this.deleteSave}>Save</button>
+        <button className="btn btn-secondary btn-sm" onClick={this.deleteCancel}>Cancel</button>
+      </div>
+    );
     const transactionsTable = (
       <div>
         <table>
           <thead>
             <tr>
+              {deletingTransactions &&
+                <th></th>}
               <th>Payee</th>
               <th>Description</th>
               <th>Amount Out</th>
@@ -135,6 +161,8 @@ class Transactions extends React.Component {
         </table>
         {addingTransaction &&
           addButtonsAndErrors}
+        {deletingTransactions &&
+          deleteButtons}
       </div>
     )
     const noTransaction = (
@@ -147,7 +175,8 @@ class Transactions extends React.Component {
     return (
       <div className="container">
         <h1>Transactions</h1>
-        <button className="btn btn-primary mb-3" onClick={this.addTransactionClick}>Add Transaction</button>   
+        <button className="btn btn-primary mb-3 mr-2" onClick={this.addTransactionClick}>Add Transaction</button>
+        <button className="btn btn-outline-danger mb-3" onClick={this.deleteTransactionClick}>Delete Transaction</button>   
         {isLoaded ?
           <div>
             {(transactions.length > 0) ? transactionsTable : noTransaction}
