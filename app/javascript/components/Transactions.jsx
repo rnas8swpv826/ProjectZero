@@ -12,7 +12,8 @@ class Transactions extends React.Component {
       payee: "",
       description: "",
       amount_out: "",
-      messages: []
+      messages: [],
+      selectedRows: []
     };
     this.loadTransactions = this.loadTransactions.bind(this);
     this.addTransactionClick = this.addTransactionClick.bind(this);
@@ -22,6 +23,7 @@ class Transactions extends React.Component {
     this.deleteCancel = this.deleteCancel.bind(this);
     this.deleteSave = this.deleteSave.bind(this);
     this.onChange = this.onChange.bind(this);
+    this.onCheckboxChange = this.onCheckboxChange.bind(this);
   }
 
   loadTransactions() {
@@ -98,7 +100,7 @@ class Transactions extends React.Component {
   }
 
   deleteCancel() {
-    this.setState({deletingTransactions: false});
+    this.setState({deletingTransactions: false, selectedRows: []});
   }
 
   deleteSave() {
@@ -109,12 +111,25 @@ class Transactions extends React.Component {
     this.setState({ [event.target.name]: event.target.value });
   }
 
+  onCheckboxChange(event) {
+    const selectedRows = this.state.selectedRows;
+    const checked = event.target.checked;
+    if (checked) {
+      selectedRows.push(event.target.value);
+    }
+    else {
+      const uncheckedIndex = selectedRows.indexOf(event.target.value);
+      selectedRows.splice(uncheckedIndex, 1);
+    }
+    this.setState({selectedRows: selectedRows});
+  }
+
   render() {
     const {transactions, isLoaded, addingTransaction, deletingTransactions, messages} = this.state; // Same as const transactions = this.state.transactions (destructuring)
     const transactionsRows = transactions.map((transaction, index) => (
       <tr key={index}>
         {deletingTransactions &&
-          <td><input type="checkbox" /></td>}
+          <td><input type="checkbox" value={transaction.id} onChange={this.onCheckboxChange}/></td>}
         <td>{transaction.payee}</td>
         <td>{transaction.description}</td>
         <td>{transaction.amount_out}</td>
