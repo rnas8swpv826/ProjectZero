@@ -15,9 +15,13 @@ class Api::TransactionsController < ApplicationController
     end
   end
 
+  def multi_destroy
+    puts params['selected_rows']
+  end
+
   private
 
   def transaction_params
-    params.require(:transaction).permit(:payee, :description, :amount_out)
+    params.require(:transaction).permit(:payee, :description, :amount_out, :selected_rows)
   end
 end
