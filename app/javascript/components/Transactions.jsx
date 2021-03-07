@@ -12,6 +12,7 @@ class Transactions extends React.Component {
       payee: "",
       description: "",
       amount_out: "",
+      transaction_date: "",
       messages: [],
       selectedRows: []
     };
@@ -54,15 +55,15 @@ class Transactions extends React.Component {
   }
 
   addCancel() {
-    this.setState({addingTransaction: false, payee: "", description: "", amount_out: "", messages: []});
+    this.setState({addingTransaction: false, payee: "", description: "", amount_out: "", transaction_date: "", messages: []});
   }
 
   addSave(event) {
     event.preventDefault();
 
     const url = "/api/transactions";
-    const { payee, description, amount_out, messages } = this.state;
-    const body = { payee, description, amount_out };
+    const { payee, description, amount_out, transaction_date, messages } = this.state;
+    const body = { payee, description, amount_out, transaction_date };
     const token = document.querySelector("meta[name='csrf-token']").content;
 
     fetch(url, {
@@ -83,7 +84,7 @@ class Transactions extends React.Component {
       })
       .then(() => {
         this.loadTransactions();
-        this.setState({payee: "", description: "", amount_out: "", messages: []});
+        this.setState({ payee: "", description: "", amount_out: "", transaction_date: "", messages: []});
       })
       .catch((error) => {
         error.json().then((body) => {
@@ -93,6 +94,9 @@ class Transactions extends React.Component {
           }
           if (keys.includes("amount_out")) {
             messages.push(`Amount out ${body.data.amount_out}`);
+          }
+          if (keys.includes("transaction_date")) {
+            messages.push(`Date ${body.data.transaction_date}`);
           }
           this.setState({messages: messages});
         });
@@ -166,6 +170,7 @@ class Transactions extends React.Component {
       <tr key={index}>
         {deletingTransactions &&
           <td><input type="checkbox" value={transaction.id} onChange={this.onCheckboxChange}/></td>}
+        <td>{transaction.transaction_date}</td>
         <td>{transaction.payee}</td>
         <td>{transaction.description}</td>
         <td>{transaction.amount_out}</td>
@@ -173,6 +178,7 @@ class Transactions extends React.Component {
     ));
     const addTransactionRow = (
       <tr>
+        <td><input type="date" name="transaction_date" onChange={this.onChange} value={this.state.transaction_date} /></td>
         <td><input type="text" name="payee" onChange={this.onChange} value={this.state.payee}/></td>
         <td><input type="text" name="description" onChange={this.onChange} value={this.state.description}/></td>
         <td><input type="text" name="amount_out" onChange={this.onChange} value={this.state.amount_out}/></td>
@@ -199,6 +205,7 @@ class Transactions extends React.Component {
             <tr>
               {deletingTransactions &&
                 <th></th>}
+              <th>Date</th>
               <th>Payee</th>
               <th>Description</th>
               <th>Amount Out</th>

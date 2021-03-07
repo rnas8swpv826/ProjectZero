@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_02_20_204818) do
+ActiveRecord::Schema.define(version: 2021_03_07_192755) do
 
   create_table "transactions", force: :cascade do |t|
     t.string "payee"
@@ -18,6 +18,7 @@ ActiveRecord::Schema.define(version: 2021_02_20_204818) do
     t.float "amount_out"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.date "transaction_date"
   end
 
 end
