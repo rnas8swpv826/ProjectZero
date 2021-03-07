@@ -50,7 +50,7 @@ class Transactions extends React.Component {
   }
 
   deleteTransactionClick() {
-    this.setState({deletingTransactions: true, addingTransaction: false});
+    this.setState({deletingTransactions: true, addingTransaction: false, messages: []});
   }
 
   addCancel() {
@@ -104,7 +104,43 @@ class Transactions extends React.Component {
   }
 
   deleteSave() {
-    console.log("Hello");
+    if (this.state.selectedRows.length == 0) {
+      const messages = this.state.messages;
+      messages.push("No selected rows.");
+      this.setState({messages: messages});
+    }
+    else {
+      this.setState({messages: []});
+      const url = "/api/transactions";
+      const {selectedRows} = this.state;
+      const body = {selected_rows: selectedRows};
+      const token = document.querySelector("meta[name='csrf-token']").content;
+      
+      fetch(url, {
+        method: "DELETE",
+        headers: {
+          "X-CSRF-TOKEN": token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)
+      })
+        .then(response => {
+          if (response.ok) {
+            return response.json();
+          }
+          else {
+            throw response;
+          }
+        })
+        .then(() => {
+          this.loadTransactions();
+          this.setState({selectedRows: []});
+          document.querySelectorAll("input[type=checkbox]").forEach(checkbox => checkbox.checked = false);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
   }
 
   onChange(event) {
@@ -149,10 +185,11 @@ class Transactions extends React.Component {
         <span className="text-danger">{messages.join(". ")}</span>
       </div>
     );
-    const deleteButtons =(
+    const deleteButtonsAndError =(
       <div className="mt-2">
         <button className="btn btn-primary btn-sm mr-1" onClick={this.deleteSave}>Save</button>
         <button className="btn btn-secondary btn-sm" onClick={this.deleteCancel}>Cancel</button>
+        <span className="text-danger">{messages.join(". ")}</span>
       </div>
     );
     const transactionsTable = (
@@ -177,7 +214,7 @@ class Transactions extends React.Component {
         {addingTransaction &&
           addButtonsAndErrors}
         {deletingTransactions &&
-          deleteButtons}
+          deleteButtonsAndError}
       </div>
     )
     const noTransaction = (
@@ -191,7 +228,7 @@ class Transactions extends React.Component {
       <div className="container">
         <h1>Transactions</h1>
         <button className="btn btn-primary mb-3 mr-2" onClick={this.addTransactionClick}>Add Transaction</button>
-        <button className="btn btn-outline-danger mb-3" onClick={this.deleteTransactionClick}>Delete Transaction</button>   
+        <button className="btn btn-outline-danger mb-3" onClick={this.deleteTransactionClick}>Delete Transactions</button>   
         {isLoaded ?
           <div>
             {(transactions.length > 0) ? transactionsTable : noTransaction}

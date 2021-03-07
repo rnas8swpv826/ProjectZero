@@ -1,4 +1,6 @@
 class Api::TransactionsController < ApplicationController
+  skip_before_action :verify_authenticity_token
+
   def index # index is a method
     transactions = Transaction.all
     render json: transactions
@@ -16,7 +18,19 @@ class Api::TransactionsController < ApplicationController
   end
 
   def multi_destroy
-    puts params['selected_rows']
+    selected_rows = params['selected_rows']
+    if selected_rows.length > 0
+      selected_rows.each do |id|
+        Transaction.find(id).delete
+      end
+      render json: {
+        data: "Selected transactions successfully deleted."
+      }
+    else
+      render json: {
+        data: "No selected rows."
+      }, status: :unprocessable_entity
+    end
   end
 
   private
