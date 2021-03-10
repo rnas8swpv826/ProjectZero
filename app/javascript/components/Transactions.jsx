@@ -14,7 +14,8 @@ class Transactions extends React.Component {
       amount_out: "",
       transaction_date: "",
       messages: [],
-      selectedRows: []
+      selectedRows: [],
+      updating: false
     };
     this.loadTransactions = this.loadTransactions.bind(this);
     this.addTransactionClick = this.addTransactionClick.bind(this);
@@ -23,8 +24,11 @@ class Transactions extends React.Component {
     this.addSave = this.addSave.bind(this);
     this.deleteCancel = this.deleteCancel.bind(this);
     this.deleteSave = this.deleteSave.bind(this);
+    this.updateCancel = this.updateCancel.bind(this);
+    this.updateSave = this.updateSave.bind(this);
     this.onChange = this.onChange.bind(this);
     this.onCheckboxChange = this.onCheckboxChange.bind(this);
+    this.update = this.update.bind(this);
   }
 
   loadTransactions() {
@@ -47,11 +51,11 @@ class Transactions extends React.Component {
   }
 
   addTransactionClick() {
-    this.setState({addingTransaction: true, deletingTransactions: false});
+    this.setState({addingTransaction: true, deletingTransactions: false, updating: false});
   }
 
   deleteTransactionClick() {
-    this.setState({deletingTransactions: true, addingTransaction: false, messages: []});
+    this.setState({deletingTransactions: true, addingTransaction: false, updating: false, messages: []});
   }
 
   addCancel() {
@@ -103,6 +107,10 @@ class Transactions extends React.Component {
       });
   }
 
+  updateSave() {
+    console.log("It works");
+  }
+
   deleteCancel() {
     this.setState({deletingTransactions: false, selectedRows: []});
   }
@@ -147,6 +155,10 @@ class Transactions extends React.Component {
     }
   }
 
+  updateCancel() {
+    this.setState({updating: false});
+  }
+
   onChange(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
@@ -164,13 +176,17 @@ class Transactions extends React.Component {
     this.setState({selectedRows: selectedRows});
   }
 
+  update(event) {
+    this.setState({updating: true, deletingTransactions: false, addingTransaction: false});
+  }
+
   render() {
-    const {transactions, isLoaded, addingTransaction, deletingTransactions, messages} = this.state; // Same as const transactions = this.state.transactions (destructuring)
+    const {transactions, isLoaded, addingTransaction, deletingTransactions, updating, messages} = this.state; // Same as const transactions = this.state.transactions (destructuring)
     const transactionsRows = transactions.map((transaction, index) => (
       <tr key={index}>
         {deletingTransactions &&
           <td><input type="checkbox" value={transaction.id} onChange={this.onCheckboxChange}/></td>}
-        <td>{transaction.transaction_date}</td>
+        <td onClick={this.update}>{transaction.transaction_date}</td>
         <td>{transaction.payee}</td>
         <td>{transaction.description}</td>
         <td>{transaction.amount_out}</td>
@@ -186,15 +202,22 @@ class Transactions extends React.Component {
     );
     const addButtonsAndErrors = (
       <div className="mt-2">
-        <button className="btn btn-primary btn-sm mr-1" onClick={this.addSave}>Save</button>
+        <button className="btn btn-primary btn-sm mr-1" onClick={this.addSave}>Add</button>
         <button className="btn btn-secondary btn-sm" onClick={this.addCancel}>Cancel</button>
         <span className="text-danger">{messages.join(". ")}</span>
       </div>
     );
     const deleteButtonsAndError =(
       <div className="mt-2">
-        <button className="btn btn-primary btn-sm mr-1" onClick={this.deleteSave}>Save</button>
+        <button className="btn btn-primary btn-sm mr-1" onClick={this.deleteSave}>Delete</button>
         <button className="btn btn-secondary btn-sm" onClick={this.deleteCancel}>Cancel</button>
+        <span className="text-danger">{messages.join(". ")}</span>
+      </div>
+    );
+    const updateButtonsAndError = (
+      <div className="mt-2">
+        <button className="btn btn-primary btn-sm mr-1" onClick={this.updateSave}>Update</button>
+        <button className="btn btn-secondary btn-sm" onClick={this.updateCancel}>Cancel</button>
         <span className="text-danger">{messages.join(". ")}</span>
       </div>
     );
@@ -222,6 +245,8 @@ class Transactions extends React.Component {
           addButtonsAndErrors}
         {deletingTransactions &&
           deleteButtonsAndError}
+        {updating &&
+          updateButtonsAndError}
       </div>
     )
     const noTransaction = (
