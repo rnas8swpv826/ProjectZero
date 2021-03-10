@@ -33,6 +33,19 @@ class Api::TransactionsController < ApplicationController
     end
   end
 
+  def update
+    transaction = Transaction.find(params['id'])
+    if transaction.update(transaction_params)
+      render json: {
+        data: "Transaction successfully updated."
+    }
+    else
+      render json: {
+        data: "Cannot update."
+      }, status: :unprocessable_entity
+    end
+  end
+
   private
 
   def transaction_params
