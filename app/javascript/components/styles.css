@@ -1,4 +1,36 @@
 td, th {
   border: 1px solid lightcoral;
   padding: 0 5px;
+  height: 25px;
+}
+.date-input{
+  border: 0;
+  padding: 0;
+  line-height: 1.0;
+}
+
+.date-cell {
+  width: 145px;
+}
+
+.payee-cell, .description-cell {
+  width: 150px;
+}
+
+.payee-input, .description-input {
+  width: 138px;
+  border: 0;
+  padding: 0;
+  line-height: 1.3;
+}
+
+.amount_out-cell {
+  width: 105px;
+}
+
+.amount_out-input {
+  width: 94px;
+  border: 0;
+  padding: 0;
+  line-height: 1.3;
 }

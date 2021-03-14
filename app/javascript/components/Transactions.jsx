@@ -53,7 +53,7 @@ class Transactions extends React.Component {
   }
 
   addTransactionClick() {
-    this.setState({addingTransaction: true, deletingTransactions: false, updating: false});
+    this.setState({addingTransaction: true, deletingTransactions: false, updating: false, payee: "", description: "", amount_out: "", transaction_date: ""});
   }
 
   deleteTransactionClick() {
@@ -94,7 +94,7 @@ class Transactions extends React.Component {
       })
       .then(() => {
         this.loadTransactions();
-        this.setState({ payee: "", description: "", amount_out: "", transaction_date: "", messages: [] });
+        this.setState({ payee: "", description: "", amount_out: "", transaction_date: "", messages: [], updating: false });
       })
       .catch((error) => {
         error.json().then((body) => {
@@ -199,35 +199,54 @@ class Transactions extends React.Component {
   }
 
   render() {
-    const {transactions, isLoaded, addingTransaction, deletingTransactions, updating, messages, transactionId} = this.state; // Same as const transactions = this.state.transactions (destructuring)
+    const {transactions, isLoaded, addingTransaction, deletingTransactions, updating, messages, transactionId, 
+      transaction_date, payee, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
     const transactionsRows = transactions.map((transaction, index) => (
       <tr key={index}>
         {deletingTransactions &&
-          <td><input type="checkbox" value={transaction.id} onChange={this.onCheckboxChange}/></td>}
+          <td>
+            <input type="checkbox" value={transaction.id} onChange={this.onCheckboxChange}/>
+          </td>}
         {(updating && transactionId == transaction.id) ?
-          <td><input type="date" name="transaction_date" onChange={this.onChange} value={this.state.transaction_date} /></td> :
-          <td onClick={(event) => this.update(event, transaction)}>{transaction.transaction_date}</td>
+          <td className="date-cell">
+            <input type="date" name="transaction_date" onChange={this.onChange} value={transaction_date} className="date-input"/>
+          </td> :
+          <td onClick={(event) => this.update(event, transaction)} className="date-cell">{transaction.transaction_date}</td>
         }
         {(updating && transactionId == transaction.id)?
-          <td><input type="text" name="payee" onChange={this.onChange} value={this.state.payee}/></td> :
-          <td onClick={(event) => this.update(event, transaction)}>{transaction.payee}</td>
+          <td className="payee-cell">
+            <input type="text" name="payee" onChange={this.onChange} value={payee} className="payee-input"/>
+          </td> :
+          <td onClick={(event) => this.update(event, transaction)} className="payee-cell">{transaction.payee}</td>
         }
         {(updating && transactionId == transaction.id) ?
-          <td><input type="text" name="description" onChange={this.onChange} value={this.state.description} /></td> :
-          <td onClick={(event) => this.update(event, transaction)}>{transaction.description}</td>
+          <td className="description-cell">
+            <input type="text" name="description" onChange={this.onChange} value={description} className="description-input" />
+          </td> :
+          <td onClick={(event) => this.update(event, transaction)} className="description-cell">{transaction.description}</td>
         }
         {(updating && transactionId == transaction.id) ?
-          <td><input type="text" name="amount_out" onChange={this.onChange} value={this.state.amount_out} /></td> :
-          <td onClick={(event) => this.update(event, transaction)}>{transaction.amount_out}</td>
+          <td className="amount_out-cell">
+            <input type="text" name="amount_out" onChange={this.onChange} value={amount_out} className="amount_out-input" />
+          </td> :
+          <td onClick={(event) => this.update(event, transaction)} className="amount_out-cell">{transaction.amount_out}</td>
         }
       </tr>
     ));
     const addTransactionRow = (
       <tr>
-        <td><input type="date" name="transaction_date" onChange={this.onChange} value={this.state.transaction_date} /></td>
-        <td><input type="text" name="payee" onChange={this.onChange} value={this.state.payee}/></td>
-        <td><input type="text" name="description" onChange={this.onChange} value={this.state.description}/></td>
-        <td><input type="text" name="amount_out" onChange={this.onChange} value={this.state.amount_out}/></td>
+        <td className="date-cell">
+          <input type="date" name="transaction_date" onChange={this.onChange} value={this.state.transaction_date} className="date-input"/>
+        </td>
+        <td className="payee-cell">
+          <input type="text" name="payee" onChange={this.onChange} value={this.state.payee} className="payee-input"/>
+        </td>
+        <td className="description-cell">
+          <input type="text" name="description" onChange={this.onChange} value={this.state.description} className="description-input"/>
+        </td>
+        <td className="amount_out-cell">
+          <input type="text" name="amount_out" onChange={this.onChange} value={this.state.amount_out} className="amount_out-input"/>
+        </td>
       </tr>
     );
     const addButtonsAndErrors = (
@@ -258,10 +277,10 @@ class Transactions extends React.Component {
             <tr>
               {deletingTransactions &&
                 <th></th>}
-              <th>Date</th>
-              <th>Payee</th>
-              <th>Description</th>
-              <th>Amount Out</th>
+              <th className="date-cell">Date</th>
+              <th className="payee-cell">Payee</th>
+              <th className="description-cell">Description</th>
+              <th className="amount_out-cell">Amount Out</th>
             </tr>
           </thead>
           <tbody>
