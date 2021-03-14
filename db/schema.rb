@@ -10,7 +10,13 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_03_07_192755) do
+ActiveRecord::Schema.define(version: 2021_03_14_194627) do
+
+  create_table "categories", force: :cascade do |t|
+    t.string "name"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+  end
 
   create_table "transactions", force: :cascade do |t|
     t.string "payee"
@@ -19,6 +25,8 @@ ActiveRecord::Schema.define(version: 2021_03_07_192755) do
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.date "transaction_date"
+    t.integer "category_id"
+    t.index ["category_id"], name: "index_transactions_on_category_id"
   end
 
 end
