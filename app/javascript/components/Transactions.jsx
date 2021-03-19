@@ -6,19 +6,22 @@ class Transactions extends React.Component {
     super(props);
     this.state = {
       transactions: [],
+      categories: [],
       isLoaded: false,
       addingTransaction: false,
       deletingTransactions: false,
+      transaction_date: "",
       payee: "",
+      category: "",
       description: "",
       amount_out: "",
-      transaction_date: "",
       messages: [],
       selectedRows: [],
       updating: false,
       transactionId: 0
     };
     this.loadTransactions = this.loadTransactions.bind(this);
+    this.loadCategories = this.loadCategories.bind(this);
     this.addTransactionClick = this.addTransactionClick.bind(this);
     this.deleteTransactionClick = this.deleteTransactionClick.bind(this);
     this.addCancel = this.addCancel.bind(this);
@@ -44,12 +47,32 @@ class Transactions extends React.Component {
           throw new Error("Network response error.");
         }
       })
-      .then(data => this.setState({ transactions: data, isLoaded: true }))
+      .then((data) => {
+        this.setState({ transactions: data, isLoaded: true });
+      })
       .catch(() => this.props.history.push("/")); // If an error is thrown, go back to homepage
   }
 
-  componentDidMount() {
+  loadCategories() {
+    const url = "/api/categories";
+    fetch(url)
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        else {
+          throw new Error("Network response error.");
+        }
+      })
+      .then((data) => {
+        this.setState({categories: data});
+      })
+      .catch(() => this.props.history.push("/")); // If an error is thrown, go back to homepage
+  }
+
+  componentDidMount() { // Will load data before render runs
     this.loadTransactions();
+    this.loadCategories();
   }
 
   addTransactionClick() {
@@ -200,7 +223,7 @@ class Transactions extends React.Component {
 
   render() {
     const {transactions, isLoaded, addingTransaction, deletingTransactions, updating, messages, transactionId, 
-      transaction_date, payee, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
+      transaction_date, payee, category, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
     const transactionsRows = transactions.map((transaction, index) => (
       <tr key={index}>
         {deletingTransactions &&
@@ -218,6 +241,12 @@ class Transactions extends React.Component {
             <input type="text" name="payee" onChange={this.onChange} value={payee} className="payee-input"/>
           </td> :
           <td onClick={(event) => this.update(event, transaction)} className="payee-cell">{transaction.payee}</td>
+        } 
+        {(updating && transactionId == transaction.id) ?
+          <td className="category-cell">
+            <input type="text" name="category" onChange={this.onChange} value={payee} className="category-input" />
+          </td> :
+          <td onClick={(event) => this.update(event, transaction)} className="category-cell">{transaction.category_name}</td> // category_name is used to match rails name for this variable
         }
         {(updating && transactionId == transaction.id) ?
           <td className="description-cell">
@@ -240,6 +269,9 @@ class Transactions extends React.Component {
         </td>
         <td className="payee-cell">
           <input type="text" name="payee" onChange={this.onChange} value={this.state.payee} className="payee-input"/>
+        </td>
+        <td className="category-cell">
+          <input type="text" name="category" onChange={this.onChange} value={this.state.category} className="category-input" />
         </td>
         <td className="description-cell">
           <input type="text" name="description" onChange={this.onChange} value={this.state.description} className="description-input"/>
@@ -279,6 +311,7 @@ class Transactions extends React.Component {
                 <th></th>}
               <th className="date-cell">Date</th>
               <th className="payee-cell">Payee</th>
+              <th className="category-cell">Category</th>
               <th className="description-cell">Description</th>
               <th className="amount_out-cell">Amount Out</th>
             </tr>

@@ -13,11 +13,11 @@ td, th {
   width: 145px;
 }
 
-.payee-cell, .description-cell {
+.payee-cell, .category-cell, .description-cell {
   width: 150px;
 }
 
-.payee-input, .description-input {
+.payee-input, .category-input, .description-input {
   width: 138px;
   border: 0;
   padding: 0;
