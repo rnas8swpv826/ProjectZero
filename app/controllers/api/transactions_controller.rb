@@ -53,6 +53,6 @@ class Api::TransactionsController < ApplicationController
   private
 
   def transaction_params
-    params.require(:transaction).permit(:payee, :description, :amount_out, :selected_rows, :transaction_date)
+    params.require(:transaction).permit(:transaction_date, :payee, :category_id, :description, :amount_out, :selected_rows)
   end
 end

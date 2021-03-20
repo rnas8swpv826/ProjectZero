@@ -17,11 +17,17 @@ td, th {
   width: 150px;
 }
 
-.payee-input, .category-input, .description-input {
+.payee-input, .description-input {
   width: 138px;
   border: 0;
   padding: 0;
   line-height: 1.3;
+}
+
+.category-select {
+height: 25px;
+line-height: 1;
+padding: 0;
 }
 
 .amount_out-cell {

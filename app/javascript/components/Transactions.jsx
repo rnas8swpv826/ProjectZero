@@ -65,7 +65,11 @@ class Transactions extends React.Component {
         }
       })
       .then((data) => {
-        this.setState({categories: data});
+        let firstCategory = "";
+        if (data.length > 0) {
+          firstCategory = data[0].id;
+        }
+        this.setState({categories: data, category: firstCategory});
       })
       .catch(() => this.props.history.push("/")); // If an error is thrown, go back to homepage
   }
@@ -95,8 +99,8 @@ class Transactions extends React.Component {
   }
 
   sendData(url, method) {
-    const { payee, description, amount_out, transaction_date, messages } = this.state;
-    const body = { payee, description, amount_out, transaction_date };
+    const {transaction_date, payee, category, description, amount_out, messages} = this.state;
+    const body = {transaction_date, payee, category_id: category, description, amount_out};
     const token = document.querySelector("meta[name='csrf-token']").content;
 
     fetch(url, {
@@ -117,7 +121,7 @@ class Transactions extends React.Component {
       })
       .then(() => {
         this.loadTransactions();
-        this.setState({ payee: "", description: "", amount_out: "", transaction_date: "", messages: [], updating: false });
+        this.setState({ transaction_date: "", payee: "", category: "", description: "", amount_out: "", messages: [], updating: false });
       })
       .catch((error) => {
         error.json().then((body) => {
@@ -222,8 +226,8 @@ class Transactions extends React.Component {
   }
 
   render() {
-    const {transactions, isLoaded, addingTransaction, deletingTransactions, updating, messages, transactionId, 
-      transaction_date, payee, category, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
+    const {transactions, categories, isLoaded, addingTransaction, deletingTransactions, updating, messages, transactionId, 
+      transaction_date, payee, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
     const transactionsRows = transactions.map((transaction, index) => (
       <tr key={index}>
         {deletingTransactions &&
@@ -244,7 +248,7 @@ class Transactions extends React.Component {
         } 
         {(updating && transactionId == transaction.id) ?
           <td className="category-cell">
-            <input type="text" name="category" onChange={this.onChange} value={payee} className="category-input" />
+            <input type="text" name="category" onChange={this.onChange} value={payee} className="category-select" />
           </td> :
           <td onClick={(event) => this.update(event, transaction)} className="category-cell">{transaction.category_name}</td> // category_name is used to match rails name for this variable
         }
@@ -262,6 +266,9 @@ class Transactions extends React.Component {
         }
       </tr>
     ));
+    const addTransactionCategoryOptions = categories.map((category, index) => (
+      <option value={category.id} key={index}>{category.name}</option> // category.id is used to save the value to the database
+    ));
     const addTransactionRow = (
       <tr>
         <td className="date-cell">
@@ -271,7 +278,9 @@ class Transactions extends React.Component {
           <input type="text" name="payee" onChange={this.onChange} value={this.state.payee} className="payee-input"/>
         </td>
         <td className="category-cell">
-          <input type="text" name="category" onChange={this.onChange} value={this.state.category} className="category-input" />
+          <select name="category" onChange={this.onChange} className="category-select custom-select">
+            {addTransactionCategoryOptions}
+          </select>
         </td>
         <td className="description-cell">
           <input type="text" name="description" onChange={this.onChange} value={this.state.description} className="description-input"/>
