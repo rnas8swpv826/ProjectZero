@@ -8,8 +8,8 @@ class Transactions extends React.Component {
       transactions: [],
       categories: [],
       isLoaded: false,
-      addingTransaction: false,
-      deletingTransactions: false,
+      adding: false,
+      deleting: false,
       transaction_date: "",
       payee: "",
       categoryId: "",
@@ -22,8 +22,8 @@ class Transactions extends React.Component {
     };
     this.loadTransactions = this.loadTransactions.bind(this);
     this.loadCategories = this.loadCategories.bind(this);
-    this.addTransactionClick = this.addTransactionClick.bind(this);
-    this.deleteTransactionClick = this.deleteTransactionClick.bind(this);
+    this.addTransactionButton = this.addTransactionButton.bind(this);
+    this.deleteTransactionButton = this.deleteTransactionButton.bind(this);
     this.addCancel = this.addCancel.bind(this);
     this.addSave = this.addSave.bind(this);
     this.deleteCancel = this.deleteCancel.bind(this);
@@ -79,16 +79,16 @@ class Transactions extends React.Component {
     this.loadCategories();
   }
 
-  addTransactionClick() {
-    this.setState({ addingTransaction: true, deletingTransactions: false, updating: false, transaction_date: "", payee: "", category:"", description: "", amount_out: ""});
+  addTransactionButton() {
+    this.setState({adding: true, deleting: false, updating: false, transaction_date: "", payee: "", category:"", description: "", amount_out: "", messages: []});
   }
 
-  deleteTransactionClick() {
-    this.setState({deletingTransactions: true, addingTransaction: false, updating: false, messages: []});
+  deleteTransactionButton() {
+    this.setState({deleting: true, adding: false, updating: false, messages: []});
   }
 
   addCancel() {
-    this.setState({addingTransaction: false, payee: "", description: "", amount_out: "", transaction_date: "", messages: []});
+    this.setState({adding: false, transaction_date: "", payee: "", description: "", amount_out: "", messages: []});
   }
 
   addSave(event) {
@@ -98,46 +98,8 @@ class Transactions extends React.Component {
     this.sendData(url, method);
   }
 
-  sendData(url, method) {
-    const {transaction_date, payee, categoryId, description, amount_out, messages} = this.state;
-    const body = {transaction_date, payee, category_id: categoryId, description, amount_out};
-    const token = document.querySelector("meta[name='csrf-token']").content;
-
-    fetch(url, {
-      method: method,
-      headers: {
-        "X-CSRF-TOKEN": token,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(body)
-    })
-      .then(response => {
-        if (response.ok) {
-          return response.json();
-        }
-        else {
-          throw response;
-        }
-      })
-      .then(() => {
-        this.loadTransactions();
-        this.setState({ transaction_date: "", payee: "", categoryId: "", description: "", amount_out: "", messages: [], updating: false });
-      })
-      .catch((error) => {
-        error.json().then((body) => {
-          const keys = Object.keys(body.data);
-          if (keys.includes("payee")) {
-            messages.push(`Payee ${body.data.payee}`);
-          }
-          if (keys.includes("amount_out")) {
-            messages.push(`Amount out ${body.data.amount_out}`);
-          }
-          if (keys.includes("transaction_date")) {
-            messages.push(`Date ${body.data.transaction_date}`);
-          }
-          this.setState({ messages: messages });
-        });
-      });
+  updateCancel() {
+    this.setState({updating: false});
   }
 
   updateSave() {
@@ -148,7 +110,7 @@ class Transactions extends React.Component {
   }
 
   deleteCancel() {
-    this.setState({deletingTransactions: false, selectedRows: []});
+    this.setState({deleting: false, selectedRows: []});
   }
 
   deleteSave() {
@@ -191,12 +153,50 @@ class Transactions extends React.Component {
     }
   }
 
-  updateCancel() {
-    this.setState({updating: false});
+  sendData(url, method) {
+    const {transaction_date, payee, categoryId, description, amount_out, messages} = this.state;
+    const body = {transaction_date, payee, category_id: categoryId, description, amount_out};
+    const token = document.querySelector("meta[name='csrf-token']").content;
+
+    fetch(url, {
+      method: method,
+      headers: {
+        "X-CSRF-TOKEN": token,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(body)
+    })
+      .then(response => {
+        if (response.ok) {
+          return response.json();
+        }
+        else {
+          throw response;
+        }
+      })
+      .then(() => {
+        this.loadTransactions();
+        this.setState({transaction_date: "", payee: "", categoryId: "", description: "", amount_out: "", messages: [], updating: false});
+      })
+      .catch((error) => {
+        error.json().then((body) => {
+          const keys = Object.keys(body.data);
+          if (keys.includes("transaction_date")) {
+            messages.push(`Date ${body.data.transaction_date}`);
+          }
+          if (keys.includes("payee")) {
+            messages.push(`Payee ${body.data.payee}`);
+          }
+          if (keys.includes("amount_out")) {
+            messages.push(`Amount out ${body.data.amount_out}`);
+          }
+          this.setState({messages: messages});
+        });
+      });
   }
 
   onChange(event) {
-    this.setState({ [event.target.name]: event.target.value });
+    this.setState({[event.target.name]: event.target.value});
   }
 
   onCheckboxChange(event) {
@@ -215,19 +215,20 @@ class Transactions extends React.Component {
   update(event, transaction) {
     this.setState({
       updating: true,
-      deletingTransactions: false,
-      addingTransaction: false,
+      deleting: false,
+      adding: false,
+      messages: [],
+      transactionId: transaction.id,
+      transaction_date: transaction.transaction_date,
       payee: transaction.payee,
       categoryId: transaction.category_id,
       description: transaction.description,
-      amount_out: transaction.amount_out,
-      transaction_date: transaction.transaction_date,
-      transactionId: transaction.id
+      amount_out: transaction.amount_out
     });
   }
 
   render() {
-    const {transactions, categories, isLoaded, addingTransaction, deletingTransactions, updating, messages, transactionId, 
+    const {transactions, categories, isLoaded, adding, deleting, updating, messages, transactionId, 
       transaction_date, payee, categoryId, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
     const selectTransactionCategoryOptions = (
       <select name="categoryId" onChange={this.onChange} className="category-select custom-select" value={categoryId}>
@@ -238,7 +239,7 @@ class Transactions extends React.Component {
     );
     const transactionsRows = transactions.map((transaction, index) => (
       <tr key={index}>
-        {deletingTransactions &&
+        {deleting &&
           <td>
             <input type="checkbox" value={transaction.id} onChange={this.onCheckboxChange}/>
           </td>}
@@ -246,7 +247,7 @@ class Transactions extends React.Component {
           <td className="date-cell">
             <input type="date" name="transaction_date" onChange={this.onChange} value={transaction_date} className="date-input"/>
           </td>
-           : <td onClick={(event) => this.update(event, transaction)} className="date-cell">{transaction.transaction_date}</td>
+           : <td onClick={(event) => this.update(event, transaction)} className="date-cell">{transaction.transaction_date}</td> // transaction_date alone cannot be used since it's not stored yet in the state (will be stored once we click)
         }
         {(updating && transactionId == transaction.id)?
           <td className="payee-cell">
@@ -277,19 +278,19 @@ class Transactions extends React.Component {
     const addTransactionRow = (
       <tr>
         <td className="date-cell">
-          <input type="date" name="transaction_date" onChange={this.onChange} value={this.state.transaction_date} className="date-input"/>
+          <input type="date" name="transaction_date" onChange={this.onChange} value={transaction_date} className="date-input"/>
         </td>
         <td className="payee-cell">
-          <input type="text" name="payee" onChange={this.onChange} value={this.state.payee} className="payee-input"/>
+          <input type="text" name="payee" onChange={this.onChange} value={payee} className="payee-input"/>
         </td>
         <td className="category-cell">
           {selectTransactionCategoryOptions}
         </td>
         <td className="description-cell">
-          <input type="text" name="description" onChange={this.onChange} value={this.state.description} className="description-input"/>
+          <input type="text" name="description" onChange={this.onChange} value={description} className="description-input"/>
         </td>
         <td className="amount_out-cell">
-          <input type="text" name="amount_out" onChange={this.onChange} value={this.state.amount_out} className="amount_out-input"/>
+          <input type="text" name="amount_out" onChange={this.onChange} value={amount_out} className="amount_out-input"/>
         </td>
       </tr>
     );
@@ -319,7 +320,7 @@ class Transactions extends React.Component {
         <table>
           <thead>
             <tr>
-              {deletingTransactions &&
+              {deleting &&
                 <th></th>}
               <th className="date-cell">Date</th>
               <th className="payee-cell">Payee</th>
@@ -330,14 +331,14 @@ class Transactions extends React.Component {
           </thead>
           <tbody>
             {transactionsRows}
-            {addingTransaction &&
+            {adding &&
               addTransactionRow
             }
           </tbody>
         </table>
-        {addingTransaction &&
+        {adding &&
           addButtonsAndErrors}
-        {deletingTransactions &&
+        {deleting &&
           deleteButtonsAndError}
         {updating &&
           updateButtonsAndError}
@@ -353,8 +354,8 @@ class Transactions extends React.Component {
     return (
       <div className="container">
         <h1>Transactions</h1>
-        <button className="btn btn-primary mb-3 mr-2" onClick={this.addTransactionClick}>Add Transaction</button>
-        <button className="btn btn-outline-danger mb-3" onClick={this.deleteTransactionClick}>Delete Transactions</button>   
+        <button className="btn btn-primary mb-3 mr-2" onClick={this.addTransactionButton}>Add Transaction</button>
+        <button className="btn btn-outline-danger mb-3" onClick={this.deleteTransactionButton}>Delete Transactions</button>   
         {isLoaded ?
           <div>
             {(transactions.length > 0) ? transactionsTable : noTransaction}
