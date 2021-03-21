@@ -12,7 +12,7 @@ class Transactions extends React.Component {
       deletingTransactions: false,
       transaction_date: "",
       payee: "",
-      category: "",
+      categoryId: "",
       description: "",
       amount_out: "",
       messages: [],
@@ -69,7 +69,7 @@ class Transactions extends React.Component {
         if (data.length > 0) {
           firstCategory = data[0].id;
         }
-        this.setState({categories: data, category: firstCategory});
+        this.setState({categories: data, categoryId: firstCategory});
       })
       .catch(() => this.props.history.push("/")); // If an error is thrown, go back to homepage
   }
@@ -80,7 +80,7 @@ class Transactions extends React.Component {
   }
 
   addTransactionClick() {
-    this.setState({addingTransaction: true, deletingTransactions: false, updating: false, payee: "", description: "", amount_out: "", transaction_date: ""});
+    this.setState({ addingTransaction: true, deletingTransactions: false, updating: false, transaction_date: "", payee: "", category:"", description: "", amount_out: ""});
   }
 
   deleteTransactionClick() {
@@ -99,8 +99,8 @@ class Transactions extends React.Component {
   }
 
   sendData(url, method) {
-    const {transaction_date, payee, category, description, amount_out, messages} = this.state;
-    const body = {transaction_date, payee, category_id: category, description, amount_out};
+    const {transaction_date, payee, categoryId, description, amount_out, messages} = this.state;
+    const body = {transaction_date, payee, category_id: categoryId, description, amount_out};
     const token = document.querySelector("meta[name='csrf-token']").content;
 
     fetch(url, {
@@ -121,7 +121,7 @@ class Transactions extends React.Component {
       })
       .then(() => {
         this.loadTransactions();
-        this.setState({ transaction_date: "", payee: "", category: "", description: "", amount_out: "", messages: [], updating: false });
+        this.setState({ transaction_date: "", payee: "", categoryId: "", description: "", amount_out: "", messages: [], updating: false });
       })
       .catch((error) => {
         error.json().then((body) => {
@@ -218,6 +218,7 @@ class Transactions extends React.Component {
       deletingTransactions: false,
       addingTransaction: false,
       payee: transaction.payee,
+      categoryId: transaction.category_id,
       description: transaction.description,
       amount_out: transaction.amount_out,
       transaction_date: transaction.transaction_date,
@@ -227,7 +228,14 @@ class Transactions extends React.Component {
 
   render() {
     const {transactions, categories, isLoaded, addingTransaction, deletingTransactions, updating, messages, transactionId, 
-      transaction_date, payee, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
+      transaction_date, payee, categoryId, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
+    const selectTransactionCategoryOptions = (
+      <select name="categoryId" onChange={this.onChange} className="category-select custom-select" value={categoryId}>
+        {categories.map((category, index) => (
+        <option value={category.id} key={index}>{category.name}</option>
+        ))}
+      </select>
+    );
     const transactionsRows = transactions.map((transaction, index) => (
       <tr key={index}>
         {deletingTransactions &&
@@ -237,37 +245,34 @@ class Transactions extends React.Component {
         {(updating && transactionId == transaction.id) ?
           <td className="date-cell">
             <input type="date" name="transaction_date" onChange={this.onChange} value={transaction_date} className="date-input"/>
-          </td> :
-          <td onClick={(event) => this.update(event, transaction)} className="date-cell">{transaction.transaction_date}</td>
+          </td>
+           : <td onClick={(event) => this.update(event, transaction)} className="date-cell">{transaction.transaction_date}</td>
         }
         {(updating && transactionId == transaction.id)?
           <td className="payee-cell">
             <input type="text" name="payee" onChange={this.onChange} value={payee} className="payee-input"/>
-          </td> :
-          <td onClick={(event) => this.update(event, transaction)} className="payee-cell">{transaction.payee}</td>
+          </td>
+           : <td onClick={(event) => this.update(event, transaction)} className="payee-cell">{transaction.payee}</td>
         } 
         {(updating && transactionId == transaction.id) ?
           <td className="category-cell">
-            <input type="text" name="category" onChange={this.onChange} value={payee} className="category-select" />
-          </td> :
-          <td onClick={(event) => this.update(event, transaction)} className="category-cell">{transaction.category_name}</td> // category_name is used to match rails name for this variable
+            {selectTransactionCategoryOptions}
+          </td>
+           : <td onClick={(event) => this.update(event, transaction)} className="category-cell">{transaction.category_name}</td> // category_name is used to match rails name for this variable
         }
         {(updating && transactionId == transaction.id) ?
           <td className="description-cell">
             <input type="text" name="description" onChange={this.onChange} value={description} className="description-input" />
-          </td> :
-          <td onClick={(event) => this.update(event, transaction)} className="description-cell">{transaction.description}</td>
+          </td>
+           : <td onClick={(event) => this.update(event, transaction)} className="description-cell">{transaction.description}</td>
         }
         {(updating && transactionId == transaction.id) ?
           <td className="amount_out-cell">
             <input type="text" name="amount_out" onChange={this.onChange} value={amount_out} className="amount_out-input" />
-          </td> :
-          <td onClick={(event) => this.update(event, transaction)} className="amount_out-cell">{transaction.amount_out}</td>
+          </td>
+           : <td onClick={(event) => this.update(event, transaction)} className="amount_out-cell">{transaction.amount_out}</td>
         }
       </tr>
-    ));
-    const addTransactionCategoryOptions = categories.map((category, index) => (
-      <option value={category.id} key={index}>{category.name}</option> // category.id is used to save the value to the database
     ));
     const addTransactionRow = (
       <tr>
@@ -278,9 +283,7 @@ class Transactions extends React.Component {
           <input type="text" name="payee" onChange={this.onChange} value={this.state.payee} className="payee-input"/>
         </td>
         <td className="category-cell">
-          <select name="category" onChange={this.onChange} className="category-select custom-select">
-            {addTransactionCategoryOptions}
-          </select>
+          {selectTransactionCategoryOptions}
         </td>
         <td className="description-cell">
           <input type="text" name="description" onChange={this.onChange} value={this.state.description} className="description-input"/>
