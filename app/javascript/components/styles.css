@@ -3,6 +3,7 @@ td, th {
   padding: 0 5px;
   height: 25px;
 }
+
 .date-input{
   border: 0;
   padding: 0;
@@ -13,7 +14,7 @@ td, th {
   width: 145px;
 }
 
-.payee-cell, .category-cell, .description-cell {
+.payee-cell, .account-cell, .category-cell, .description-cell {
   width: 150px;
 }
 
@@ -24,10 +25,10 @@ td, th {
   line-height: 1.3;
 }
 
-.category-select {
-height: 25px;
-line-height: 1;
-padding: 0;
+.account-select, .category-select {
+  height: 25px;
+  line-height: 1;
+  padding: 0;
 }
 
 .amount_out-cell {
