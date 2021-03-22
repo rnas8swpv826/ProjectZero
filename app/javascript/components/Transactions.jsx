@@ -212,7 +212,7 @@ class Transactions extends React.Component {
     this.setState({selectedRows: selectedRows});
   }
 
-  update(event, transaction) {
+  update(transaction) {
     this.setState({
       updating: true,
       deleting: false,
@@ -247,31 +247,31 @@ class Transactions extends React.Component {
           <td className="date-cell">
             <input type="date" name="transaction_date" onChange={this.onChange} value={transaction_date} className="date-input"/>
           </td>
-           : <td onClick={(event) => this.update(event, transaction)} className="date-cell">{transaction.transaction_date}</td> // transaction_date alone cannot be used since it's not stored yet in the state (will be stored once we click)
+           : <td onClick={() => this.update(transaction)} className="date-cell">{transaction.transaction_date}</td> // transaction_date alone cannot be used since it's not stored yet in the state (will be stored once we click)
         }
         {(updating && transactionId == transaction.id)?
           <td className="payee-cell">
             <input type="text" name="payee" onChange={this.onChange} value={payee} className="payee-input"/>
           </td>
-           : <td onClick={(event) => this.update(event, transaction)} className="payee-cell">{transaction.payee}</td>
+          : <td onClick={() => this.update(transaction)} className="payee-cell">{transaction.payee}</td>
         } 
         {(updating && transactionId == transaction.id) ?
           <td className="category-cell">
             {selectTransactionCategoryOptions}
           </td>
-           : <td onClick={(event) => this.update(event, transaction)} className="category-cell">{transaction.category_name}</td> // category_name is used to match rails name for this variable
+          : <td onClick={() => this.update(transaction)} className="category-cell">{transaction.category_name}</td> // category_name is used to match rails name for this variable
         }
         {(updating && transactionId == transaction.id) ?
           <td className="description-cell">
             <input type="text" name="description" onChange={this.onChange} value={description} className="description-input" />
           </td>
-           : <td onClick={(event) => this.update(event, transaction)} className="description-cell">{transaction.description}</td>
+          : <td onClick={() => this.update(transaction)} className="description-cell">{transaction.description}</td>
         }
         {(updating && transactionId == transaction.id) ?
           <td className="amount_out-cell">
             <input type="text" name="amount_out" onChange={this.onChange} value={amount_out} className="amount_out-input" />
           </td>
-           : <td onClick={(event) => this.update(event, transaction)} className="amount_out-cell">{transaction.amount_out}</td>
+          : <td onClick={() => this.update(transaction)} className="amount_out-cell">{transaction.amount_out}</td>
         }
       </tr>
     ));

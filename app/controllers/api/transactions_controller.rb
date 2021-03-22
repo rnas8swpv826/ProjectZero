@@ -3,7 +3,7 @@ class Api::TransactionsController < ApplicationController
 
   def index # index is a method
     transactions = Transaction.all
-    transactions_json = JSON.parse(transactions.to_json)
+    transactions_json = transactions.as_json
     transactions.each_with_index do |transaction, index|
       transactions_json[index]['category_name'] = transaction.category.name
     end
