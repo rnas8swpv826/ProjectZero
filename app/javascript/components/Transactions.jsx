@@ -105,7 +105,7 @@ class Transactions extends React.Component {
   }
 
   addTransactionButton() {
-    this.setState({adding: true, deleting: false, updating: false, transaction_date: "", accounts: "", payee: "", categories: "", description: "", amount_out: "", messages: []});
+    this.setState({adding: true, deleting: false, updating: false, transaction_date: "", payee: "", description: "", amount_out: "", messages: []});
   }
 
   deleteTransactionButton() {
