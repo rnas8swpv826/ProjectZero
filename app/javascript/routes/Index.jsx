@@ -10,8 +10,8 @@ export default (
     <Switch>
       <Route path="/" exact component={Home} />
       <Route path="/transactions" exact component={Transactions} />
-      <Route path="/categories/new" exact component={AddCategory} />
-      <Route path="/accounts/new" exact component={AddAccount} />
+      <Route path="/categories" exact component={AddCategory} />
+      <Route path="/accounts" exact component={AddAccount} />
     </Switch>
   </Router> 
 );
