@@ -3,7 +3,7 @@ import {Link} from "react-router-dom";
 import * as styles from "./styles.css";
 import $ from "jquery";
 
-class AddCategory extends React.Component {
+class Categories extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -201,4 +201,4 @@ class AddCategory extends React.Component {
   }
 }
 
-export default AddCategory;
+export default Categories;

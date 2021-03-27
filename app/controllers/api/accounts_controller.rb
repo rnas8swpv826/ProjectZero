@@ -17,6 +17,32 @@ class Api::AccountsController < ApplicationController
     end
   end
 
+  def update
+    account = Account.find(params['id'])
+    if account.update(account_params)
+      render json: {
+        data: "Category successfully updated."
+    }
+    else
+      render json: {
+        data: "Cannot update."
+      }, status: :unprocessable_entity
+    end
+  end
+  
+  def destroy
+    account = Account.find(params['id'])
+    if account.destroy
+      render json: {
+        data: "Category successfully deleted."
+      }
+    else
+      render json: {
+        data: "Cannot delete."
+      }, status: :unprocessable_entity
+    end
+  end
+
  private
 
   def account_params
