@@ -1,6 +1,7 @@
 import React from "react";
 import {Link} from "react-router-dom";
 import * as styles from "./styles.css";
+import $ from "jquery";
 
 class AddCategory extends React.Component {
   constructor(props) {
@@ -11,7 +12,7 @@ class AddCategory extends React.Component {
       categories: [],
       adding: true,
       renaming: false,
-      deleting: false,
+      showModal: false,
       categoryId: 0
     };
     this.loadCategories = this.loadCategories.bind(this);
@@ -20,6 +21,8 @@ class AddCategory extends React.Component {
     this.sendDelete = this.sendDelete.bind(this);
     this.onChange = this.onChange.bind(this);
     this.rename = this.rename.bind(this);
+    this.cancelRename = this.cancelRename.bind(this);
+    this.toDelete = this.toDelete.bind(this);
   }
 
   loadCategories() {
@@ -91,10 +94,10 @@ class AddCategory extends React.Component {
       });
   }
 
-  sendDelete(category) {
-    const {name} = this.state;
-    const url = `/api/categories/${category.id}`;
-    const body = {name, id: category.id};
+  sendDelete() {
+    const {name, categoryId} = this.state;
+    const url = `/api/categories/${categoryId}`;
+    const body = {name, id: categoryId};
     const token = document.querySelector("meta[name='csrf-token']").content;
 
     fetch(url, {
@@ -116,6 +119,7 @@ class AddCategory extends React.Component {
       .then(() => {
         this.loadCategories();
         this.setState({name: "", categoryId: 0});
+        $("#deleteConfirmation").modal('hide');
       })
       .catch((error) => {
         console.log(error);
@@ -130,8 +134,34 @@ class AddCategory extends React.Component {
     this.setState({name: category.name, categoryId: category.id, renaming: true, adding: false})
   }
 
+  toDelete(category) {
+    this.setState({name: category.name, categoryId: category.id})
+  }
+
+  cancelRename() {
+    this.setState({name: "", renaming: false, adding: true})
+  }
+
   render() {
     const {adding, renaming, categories, name} = this.state;
+    const deleteConfirmation = (
+      <div className="modal fade" id="deleteConfirmation" tabIndex="-1" role="dialog">
+        <div className="modal-dialog" role="document">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h5 className="modal-title">Confirmation required</h5>
+            </div>
+            <div className="modal-body">
+              <p>Are you sure you want to delete {name}?</p>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              <button className="btn btn-primary" onClick={this.sendDelete}>Yes</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
     return (
       <div className="container mt-5">
         <div className="col-lg-6 offset-lg-3">
@@ -145,7 +175,9 @@ class AddCategory extends React.Component {
             <button className="btn btn-primary" onClick={this.sendRename}>Rename</button>}
           <Link to="/" className="btn btn-link">Back to Home</Link>
           <Link to="/transactions" className="btn btn-link">Back to Transactions</Link>
-    
+          {renaming &&
+            <button className="btn btn-secondary" onClick={this.cancelRename}>Cancel</button>}
+
           <h1 className="mb-3 mt-3">Existing categories</h1>
           {categories.map((category, index) => (
             <div key={index} className="container">
@@ -157,7 +189,8 @@ class AddCategory extends React.Component {
                   <button className="btn btn-link rename-delete-btn" onClick={() => this.rename(category)}>Rename</button>
                 </div>
                 <div className="col-sm-3">
-                  <button className="btn btn-link rename-delete-btn" onClick={() => this.sendDelete(category)}>Delete</button>
+                  <button className="btn btn-link rename-delete-btn" data-toggle="modal" data-target="#deleteConfirmation" onClick={() => this.toDelete(category)}>Delete</button>
+                  {deleteConfirmation}
                 </div>
               </div>
             </div>
