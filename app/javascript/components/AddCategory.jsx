@@ -1,5 +1,6 @@
 import React from "react";
 import {Link} from "react-router-dom";
+import * as styles from "./styles.css";
 
 class AddCategory extends React.Component {
   constructor(props) {
@@ -147,10 +148,18 @@ class AddCategory extends React.Component {
     
           <h1 className="mb-3 mt-3">Existing categories</h1>
           {categories.map((category, index) => (
-            <div key={index}>
-              <span>{category.name}</span>
-              <button className="btn btn-link" onClick={() => this.rename(category)}>Rename</button>
-              <button className="btn btn-link" onClick={() => this.sendDelete(category)}>Delete</button>
+            <div key={index} className="container">
+              <div className="row">
+                <div className="col-sm-3">
+                  <span>{category.name}</span>
+                </div>
+                <div className="col-sm-3">
+                  <button className="btn btn-link rename-delete-btn" onClick={() => this.rename(category)}>Rename</button>
+                </div>
+                <div className="col-sm-3">
+                  <button className="btn btn-link rename-delete-btn" onClick={() => this.sendDelete(category)}>Delete</button>
+                </div>
+              </div>
             </div>
           ))}
         </div>

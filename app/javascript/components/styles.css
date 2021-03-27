@@ -41,3 +41,8 @@ td, th {
   padding: 0;
   line-height: 1.3;
 }
+
+.rename-delete-btn {
+   border: 0;
+   padding: 0;
+}
