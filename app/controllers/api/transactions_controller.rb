@@ -7,6 +7,7 @@ class Api::TransactionsController < ApplicationController
     transactions.each_with_index do |transaction, index|
       transactions_json[index]['category_name'] = transaction.category.name
       transactions_json[index]['account_name'] = transaction.account&.name # & is used for safe nav
+      transactions_json[index]['amount_out'] = '%.2f' %transaction.amount_out
     end
     render json: transactions_json
   end
