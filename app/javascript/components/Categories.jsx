@@ -165,7 +165,7 @@ class Categories extends React.Component {
     return (
       <div className="container mt-5">
         <div className="col-lg-6 offset-lg-3">
-          <h1 className="mb-3">Add a new category</h1>
+          <h2 className="mb-3">Add a new category</h2>
           <h6>Name</h6>
           <input className="form-control" type="text" name="name" onChange={this.onChange} value={name} />
           <h6 className="text-danger">{this.state.error}</h6>
@@ -178,7 +178,7 @@ class Categories extends React.Component {
           {renaming &&
             <button className="btn btn-secondary" onClick={this.cancelRename}>Cancel</button>}
 
-          <h1 className="mb-3 mt-3">Existing categories</h1>
+          <h2 className="mb-3 mt-3">Existing categories</h2>
           {categories.map((category, index) => (
             <div key={index} className="container">
               <div className="row">

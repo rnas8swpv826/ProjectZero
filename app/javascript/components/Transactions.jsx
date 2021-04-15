@@ -1,6 +1,7 @@
 import React from "react";
-import {Link} from "react-router-dom";
+// import {Link} from "react-router-dom";
 import * as styles from "./styles.css";
+import { HashLink as Link} from 'react-router-hash-link';
 
 class Transactions extends React.Component {
   constructor(props) {
@@ -397,15 +398,20 @@ class Transactions extends React.Component {
     
     return (
       <div className="container">
-        <h1>Transactions</h1>
-        <button className="btn btn-primary mb-3 mr-2" onClick={this.addTransactionButton}>Add Transaction</button>
-        <button className="btn btn-outline-danger mb-3 mr-2" onClick={this.deleteTransactionButton}>Delete Transactions</button>   
-        <Link to="/" className="btn btn-outline-primary mb-3">Back to Home</Link>
-        {isLoaded ?
-          <div>
-            {(transactions.length > 0) ? transactionsTable : noTransaction}
-          </div>
-         : loadingTransactions}
+        <header>
+          <h1 id="top">Transactions</h1>
+          <button className="btn btn-primary mb-3 mr-2" onClick={this.addTransactionButton}>Add Transaction</button>
+          <button className="btn btn-outline-danger mb-3 mr-2" onClick={this.deleteTransactionButton}>Delete Transactions</button>   
+          <Link to="/" className="btn btn-outline-primary mb-3">Back to Home</Link>
+        </header>
+        <body>
+          {isLoaded ?
+            <div>
+              {(transactions.length > 0) ? transactionsTable : noTransaction}
+            </div>
+            : loadingTransactions}
+          <Link to="#top">Scroll to top</Link>
+        </body>
       </div>
     );
   }
