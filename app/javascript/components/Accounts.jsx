@@ -170,7 +170,7 @@ class Accounts extends React.Component {
           <input className="form-control" type="text" name="name" onChange={this.onChange} value={name} />
           <h6 className="text-danger">{this.state.error}</h6>
           {adding &&
-            <button className="btn btn-primary" onClick={this.sendNew}>Add Category</button>}
+            <button className="btn btn-primary" onClick={this.sendNew}>Add Account</button>}
           {renaming &&
             <button className="btn btn-primary" onClick={this.sendRename}>Rename</button>}
           <Link to="/" className="btn btn-link">Back to Home</Link>
