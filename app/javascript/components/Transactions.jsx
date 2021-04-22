@@ -10,6 +10,7 @@ class Transactions extends React.Component {
       transactions: [],
       accounts: [],
       categories: [],
+      subcategories: [],
       isLoaded: false,
       adding: false,
       deleting: false,
@@ -17,6 +18,7 @@ class Transactions extends React.Component {
       accountId: "",
       payee: "",
       categoryId: "",
+      subcategoryId: "",
       description: "",
       amount_out: "",
       messages: [],
@@ -54,6 +56,7 @@ class Transactions extends React.Component {
       })
       .then((data) => {
         this.setState({ transactions: data, isLoaded: true });
+        console.log(data);
       })
       .catch(() => this.props.history.push("/")); // If an error is thrown, go back to homepage
   }
@@ -91,11 +94,16 @@ class Transactions extends React.Component {
         }
       })
       .then((data) => {
+        let categories = [];
+        let subcategories = [];
+        data.map((category) => {(category.parent_id == null) ? categories.push(category)
+                                : subcategories.push(category)
+        });
         let firstCategory = "";
-        if (data.length > 0) {
-          firstCategory = data[0].id;
+        if (categories.length > 0) {
+          firstCategory = categories[0].id;
         }
-        this.setState({categories: data, categoryId: firstCategory});
+        this.setState({categories, subcategories, categoryId: firstCategory});
       })
       .catch(() => this.props.history.push("/")); // If an error is thrown, go back to homepage
   }
@@ -181,8 +189,8 @@ class Transactions extends React.Component {
   }
 
   sendData(url, method) {
-    const {transaction_date, accountId, payee, categoryId, description, amount_out, messages} = this.state;
-    const body = {transaction_date, account_id: accountId, payee, category_id: categoryId, description, amount_out};
+    const {transaction_date, accountId, payee, subcategoryId, description, amount_out, messages} = this.state;
+    const body = {transaction_date, account_id: accountId, payee, category_id: subcategoryId, description, amount_out};
     const token = document.querySelector("meta[name='csrf-token']").content;
 
     fetch(url, {
@@ -250,6 +258,7 @@ class Transactions extends React.Component {
       accountId: transaction.account_id,
       payee: transaction.payee,
       categoryId: transaction.category_id,
+      subcategoryId: transaction.subcategory_id,
       description: transaction.description,
       amount_out: transaction.amount_out
     });
@@ -257,16 +266,23 @@ class Transactions extends React.Component {
 
   render() {
     const {transactions, isLoaded, adding, deleting, updating, messages, transactionId, 
-      transaction_date, accounts, accountId, payee, categories, categoryId, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
+      transaction_date, accounts, accountId, payee, categories, categoryId, subcategories, subcategoryId, description, amount_out} = this.state; // Same as const transactions = this.state.transactions (destructuring)
     const selectTransactionCategoryOptions = (
-      <select name="categoryId" onChange={this.onChange} className="category-select custom-select" value={categoryId}>
+      <select name="categoryId" onChange={this.onChange} className="category-select custom-select-sm" value={categoryId}>
         {categories.map((category, index) => (
         <option value={category.id} key={index}>{category.name}</option>
         ))}
       </select>
     );
+    const selectTransactionSubcategoryOptions = (
+      <select name="subcategoryId" onChange={this.onChange} className="category-select custom-select-sm" value={subcategoryId}>
+        {subcategories.map((subcategory, index) => (
+          <option value={subcategory.id} key={index}>{subcategory.name}</option>
+        ))}
+      </select>
+    );
     const selectTransactionAccountOptions = (
-      <select name="accountId" onChange={this.onChange} className="account-select custom-select" value={accountId}>
+      <select name="accountId" onChange={this.onChange} className="account-select custom-select-sm" value={accountId}>
         {accounts.map((account, index) => (
           <option value={account.id} key={index}>{account.name}</option>
         ))}
@@ -303,6 +319,12 @@ class Transactions extends React.Component {
           : <td onClick={() => this.update(transaction)} className="category-cell">{transaction.category_name}</td> // category_name is used to match rails name for this variable
         }
         {(updating && transactionId == transaction.id) ?
+          <td className="category-cell">
+            {selectTransactionSubcategoryOptions}
+          </td>
+          : <td onClick={() => this.update(transaction)} className="category-cell">{transaction.subcategory_name}</td>
+        }
+        {(updating && transactionId == transaction.id) ?
           <td className="description-cell">
             <input type="text" name="description" onChange={this.onChange} value={description} className="description-input" />
           </td>
@@ -329,6 +351,9 @@ class Transactions extends React.Component {
         </td>
         <td className="category-cell">
           {selectTransactionCategoryOptions}
+        </td>
+        <td className="category-cell">
+          {selectTransactionSubcategoryOptions}
         </td>
         <td className="description-cell">
           <input type="text" name="description" onChange={this.onChange} value={description} className="description-input"/>
@@ -370,6 +395,7 @@ class Transactions extends React.Component {
               <th className="account-cell">Account</th>
               <th className="payee-cell">Payee</th>
               <th className="category-cell">Category</th>
+              <th className="category-cell">Subcategory</th>
               <th className="description-cell">Description</th>
               <th className="amount_out-cell">Amount Out</th>
             </tr>
@@ -398,20 +424,16 @@ class Transactions extends React.Component {
     
     return (
       <div className="container">
-        <header>
           <h1 id="top">Transactions</h1>
           <button className="btn btn-primary mb-3 mr-2" onClick={this.addTransactionButton}>Add Transaction</button>
           <button className="btn btn-outline-danger mb-3 mr-2" onClick={this.deleteTransactionButton}>Delete Transactions</button>   
           <Link to="/" className="btn btn-outline-primary mb-3">Back to Home</Link>
-        </header>
-        <body>
           {isLoaded ?
             <div>
               {(transactions.length > 0) ? transactionsTable : noTransaction}
             </div>
             : loadingTransactions}
           <Link to="#top">Scroll to top</Link>
-        </body>
       </div>
     );
   }

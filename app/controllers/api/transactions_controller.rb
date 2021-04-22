@@ -3,11 +3,20 @@ class Api::TransactionsController < ApplicationController
 
   def index # index is a method
     transactions = Transaction.all
+    categories = Category.all
     transactions_json = transactions.as_json
     transactions.each_with_index do |transaction, index|
-      transactions_json[index]['category_name'] = transaction.category.name
       transactions_json[index]['account_name'] = transaction.account&.name # & is used for safe nav
       transactions_json[index]['amount_out'] = '%.2f' %transaction.amount_out
+      if transaction.category.parent_id != nil
+        parent_id = transaction.category.parent_id
+        transactions_json[index]['category_name'] = categories.find(parent_id).name
+        transactions_json[index]['category_id'] = parent_id
+        transactions_json[index]['subcategory_name'] = transaction.category.name
+        transactions_json[index]['subcategory_id'] = transaction.category_id
+      else
+        transactions_json[index]['category_name'] = transaction.category.name
+      end
     end
     render json: transactions_json
   end

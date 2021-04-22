@@ -14,8 +14,12 @@ td, th {
   width: 145px;
 }
 
-.payee-cell, .account-cell, .category-cell, .description-cell {
+.payee-cell, .account-cell, .description-cell {
   width: 150px;
+}
+
+.category-cell {
+  width: 175px;
 }
 
 .payee-input, .description-input {
