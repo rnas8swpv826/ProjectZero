@@ -56,7 +56,6 @@ class Transactions extends React.Component {
       })
       .then((data) => {
         this.setState({ transactions: data, isLoaded: true });
-        console.log(data);
       })
       .catch(() => this.props.history.push("/")); // If an error is thrown, go back to homepage
   }
@@ -277,7 +276,8 @@ class Transactions extends React.Component {
     const selectTransactionSubcategoryOptions = (
       <select name="subcategoryId" onChange={this.onChange} className="category-select custom-select-sm" value={subcategoryId}>
         {subcategories.map((subcategory, index) => (
-          <option value={subcategory.id} key={index}>{subcategory.name}</option>
+          (subcategory.parent_id == categoryId) ? 
+          <option value={subcategory.id} key={index}>{subcategory.name}</option> : null
         ))}
       </select>
     );
