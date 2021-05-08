@@ -35,12 +35,15 @@ td, th {
   padding: 0;
 }
 
-.amount_out-cell {
+.amount-out-cell {
   width: 105px;
   text-align: right;
 }
 
-.amount_out-input {
+th.amount-out-cell {
+  text-align: left;
+}
+.amount-out-input {
   width: 94px;
   border: 0;
   padding: 0;
