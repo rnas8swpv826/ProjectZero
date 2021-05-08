@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import useHttpRequest from '../hooks/useHttpRequest';
+import TransactionsTable from './TransactionsTable';
 
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
@@ -16,10 +17,11 @@ const Transactions = () => {
   // ------------
 
   return (
-    <div>
+    <div className="container">
       <h1>Transactions</h1>
+      {isLoading && <p>Transactions are loading.</p>}
       {transactions.length > 0 && !isLoading
-        ? <p>{transactions[0].payee}</p> : <p>No Transactions</p>}
+        ? <TransactionsTable transactions={transactions} /> : <p>No transactions to show.</p>}
       {error}
     </div>
   );
