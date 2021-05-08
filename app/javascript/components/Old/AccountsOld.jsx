@@ -2,18 +2,18 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import $ from 'jquery';
 
-class Categories extends React.Component {
+class AccountsOld extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       name: '',
       error: '',
-      categories: [],
+      accounts: [],
       adding: true,
       renaming: false,
-      categoryId: 0,
+      accountId: 0,
     };
-    this.loadCategories = this.loadCategories.bind(this);
+    this.loadAccounts = this.loadAccounts.bind(this);
     this.sendNew = this.sendNew.bind(this);
     this.sendRename = this.sendRename.bind(this);
     this.sendDelete = this.sendDelete.bind(this);
@@ -24,15 +24,15 @@ class Categories extends React.Component {
   }
 
   componentDidMount() {
-    this.loadCategories();
+    this.loadAccounts();
   }
 
   onChange(event) {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  loadCategories() {
-    const url = '/api/categories';
+  loadAccounts() {
+    const url = '/api/accounts';
     fetch(url)
       .then((response) => {
         if (response.ok) {
@@ -41,7 +41,7 @@ class Categories extends React.Component {
         throw new Error('Network response error.');
       })
       .then((data) => {
-        this.setState({ categories: data });
+        this.setState({ accounts: data });
       })
       .catch(() => {
         const { history } = this.props;
@@ -50,21 +50,21 @@ class Categories extends React.Component {
   }
 
   sendNew() {
-    const url = '/api/categories';
+    const url = '/api/accounts';
     const method = 'POST';
     this.sendData(url, method);
   }
 
   sendRename() {
-    const { categoryId } = this.state;
-    const url = `/api/categories/${categoryId}`;
+    const { accountId } = this.state;
+    const url = `/api/accounts/${accountId}`;
     const method = 'PATCH';
     this.sendData(url, method);
   }
 
   sendData(url, method) {
-    const { name, categoryId } = this.state;
-    const body = { name, id: categoryId };
+    const { name, accountId } = this.state;
+    const body = { name, id: accountId };
     const token = document.querySelector("meta[name='csrf-token']").content;
 
     fetch(url, {
@@ -82,10 +82,10 @@ class Categories extends React.Component {
         throw response;
       })
       .then(() => {
-        this.loadCategories();
+        this.loadAccounts();
         this.setState({
           name: '',
-          categoryId: 0,
+          accountId: 0,
           adding: true,
           renaming: false,
         });
@@ -101,9 +101,9 @@ class Categories extends React.Component {
   }
 
   sendDelete() {
-    const { name, categoryId } = this.state;
-    const url = `/api/categories/${categoryId}`;
-    const body = { name, id: categoryId };
+    const { name, accountId } = this.state;
+    const url = `/api/accounts/${accountId}`;
+    const body = { name, id: accountId };
     const token = document.querySelector("meta[name='csrf-token']").content;
 
     fetch(url, {
@@ -121,8 +121,8 @@ class Categories extends React.Component {
         throw response;
       })
       .then(() => {
-        this.loadCategories();
-        this.setState({ name: '', categoryId: 0 });
+        this.loadAccounts();
+        this.setState({ name: '', accountId: 0 });
         $('#deleteConfirmation').modal('hide');
       })
       .catch((error) => {
@@ -130,17 +130,17 @@ class Categories extends React.Component {
       });
   }
 
-  rename(category) {
+  rename(account) {
     this.setState({
-      name: category.name,
-      categoryId: category.id,
+      name: account.name,
+      accountId: account.id,
       renaming: true,
       adding: false,
     });
   }
 
-  toDelete(category) {
-    this.setState({ name: category.name, categoryId: category.id });
+  toDelete(account) {
+    this.setState({ name: account.name, accountId: account.id });
   }
 
   cancelRename() {
@@ -151,7 +151,7 @@ class Categories extends React.Component {
     const {
       adding,
       renaming,
-      categories,
+      accounts,
       name,
       error,
     } = this.state;
@@ -163,7 +163,9 @@ class Categories extends React.Component {
               <h5 className="modal-title">Confirmation required</h5>
             </div>
             <div className="modal-body">
-              <p>Are you sure you want to delete {name}?</p>
+              <p>
+                Are you sure you want to delete {name}?
+              </p>
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -176,31 +178,31 @@ class Categories extends React.Component {
     return (
       <div className="container mt-5">
         <div className="col-lg-6 offset-lg-3">
-          <h2 className="mb-3">Add a new category</h2>
+          <h2 className="mb-3">Add a new account</h2>
           <h6>Name</h6>
           <input className="form-control" type="text" name="name" onChange={this.onChange} value={name} />
           <h6 className="text-danger">{error}</h6>
           {adding
-            && <button type="button" className="btn btn-primary" onClick={this.sendNew}>Add Category</button>}
+          && <button type="button" className="btn btn-primary" onClick={this.sendNew}>Add Account</button>}
           {renaming
-            && <button type="button" className="btn btn-primary" onClick={this.sendRename}>Rename</button>}
+          && <button type="button" className="btn btn-primary" onClick={this.sendRename}>Rename</button>}
           <Link to="/" className="btn btn-link">Back to Home</Link>
           <Link to="/transactions" className="btn btn-link">Back to Transactions</Link>
           {renaming
-            && <button type="button" className="btn btn-secondary" onClick={this.cancelRename}>Cancel</button>}
+          && <button type="button" className="btn btn-secondary" onClick={this.cancelRename}>Cancel</button>}
 
-          <h2 className="mb-3 mt-3">Existing categories</h2>
-          {categories.map((category) => (
-            <div key={category.id} className="container">
+          <h2 className="mb-3 mt-3">Existing accounts</h2>
+          {accounts.map((account) => (
+            <div key={account.id} className="container">
               <div className="row">
                 <div className="col-sm-3">
-                  <span>{category.name}</span>
+                  <span>{account.name}</span>
                 </div>
                 <div className="col-sm-3">
-                  <button type="button" className="btn btn-link rename-delete-btn" onClick={() => this.rename(category)}>Rename</button>
+                  <button type="button" className="btn btn-link rename-delete-btn" onClick={() => this.rename(account)}>Rename</button>
                 </div>
                 <div className="col-sm-3">
-                  <button type="button" className="btn btn-link rename-delete-btn" data-toggle="modal" data-target="#deleteConfirmation" onClick={() => this.toDelete(category)}>Delete</button>
+                  <button type="button" className="btn btn-link rename-delete-btn" data-toggle="modal" data-target="#deleteConfirmation" onClick={() => this.toDelete(account)}>Delete</button>
                   {deleteConfirmation}
                 </div>
               </div>
@@ -212,4 +214,4 @@ class Categories extends React.Component {
   }
 }
 
-export default Categories;
+export default AccountsOld;
