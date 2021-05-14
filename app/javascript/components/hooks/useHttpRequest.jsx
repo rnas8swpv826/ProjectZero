@@ -21,7 +21,6 @@ const useHttpRequest = (requestParams, dataTransformation) => {
         },
       );
       // Config above defaults to GET request without headers and body
-
       if (!response.ok) {
         throw new Error('Network error.');
       }
@@ -29,7 +28,8 @@ const useHttpRequest = (requestParams, dataTransformation) => {
       const data = await response.json();
       dataTransformation(data);
     } catch (err) {
-      setError(err.message || 'Something went wrong!');
+      // setError(err.message || 'Something went wrong!'); // Error isn't setting properly
+      console.log(err.json());
     }
     setIsLoading(false);
   };
