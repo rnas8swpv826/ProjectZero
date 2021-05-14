@@ -5,6 +5,7 @@ module.exports = {
     },
     "extends": [
         "plugin:react/recommended",
+        "plugin:react-hooks/recommended",
         "airbnb"
     ],
     "parserOptions": {
@@ -15,7 +16,7 @@ module.exports = {
         "sourceType": "module"
     },
     "plugins": [
-        "react"
+        "react",
     ],
     "rules": {
         "react/jsx-one-expression-per-line": "off",
