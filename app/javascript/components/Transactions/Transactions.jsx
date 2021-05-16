@@ -4,20 +4,68 @@ import TransactionsTable from './TransactionsTable';
 import ButtonsAndErrors from './ButtonsAndErrors';
 
 const Transactions = () => {
+  // Table Data
   const [transactions, setTransactions] = useState([]);
+  const [accounts, setAccounts] = useState([]);
+  const [accountId, setAccountId] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [categoryId, setCategoryId] = useState('');
+  const [subcategories, setSubcategories] = useState([]);
+  const [subcategoryId, setSubcategoryId] = useState('');
+  // Other States
   const [messages, setMessages] = useState([]);
   const [adding, setAdding] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
 
-  // ---- Load Transactions ----
+  // ---- Load Transactions, Accounts and Categories ----
   const loadTransactions = useHttpRequest(
     { url: '/api/transactions' },
     (data) => setTransactions(data),
   );
 
+  const getAccountsData = (data) => {
+    let firstAccount = '';
+    if (data.length > 0) {
+      firstAccount = data[0].id;
+    }
+    setAccountId(firstAccount);
+    setAccounts(data);
+  };
+
+  const loadAccounts = useHttpRequest(
+    { url: 'api/accounts' },
+    getAccountsData,
+  );
+
+  const getCategoriesData = (data) => {
+    const cat = [];
+    const subcat = [];
+    data.forEach((category) => {
+      if (category.parent_id == null) {
+        cat.push(category);
+      } else {
+        subcat.push(category);
+      }
+    });
+    let firstCategory = '';
+    if (cat.length > 0) {
+      firstCategory = cat[0].id;
+    }
+    setCategories(cat);
+    setSubcategories(subcat);
+    setCategoryId(firstCategory);
+  };
+
+  const loadCategories = useHttpRequest(
+    { url: 'api/categories' },
+    getCategoriesData,
+  );
+
   useEffect(() => {
     loadTransactions.sendRequest();
+    loadAccounts.sendRequest();
+    loadCategories.sendRequest();
   }, []);
   // ------------
 
@@ -82,6 +130,18 @@ const Transactions = () => {
   };
   // ------------
 
+  // ---- Set state after selecting dropdown option in table ----
+  const onChangeHandler = (event) => {
+    if (event.target.name === 'accountId') {
+      setAccountId(event.target.value);
+    } else if (event.target.name === 'categoryId') {
+      setCategoryId(event.target.value);
+    } else if (event.target.name === 'subcategoryId') {
+      setSubcategoryId(event.target.value);
+    }
+  };
+  // ------------
+
   return (
     <div className="container">
       <h1>Transactions</h1>
@@ -104,9 +164,16 @@ const Transactions = () => {
         ? (
           <TransactionsTable
             transactions={transactions}
+            accounts={accounts}
+            accountId={accountId}
+            categories={categories}
+            categoryId={categoryId}
+            subcategories={subcategories}
+            subcategoryId={subcategoryId}
             adding={adding}
             deleting={deleting}
             onCheckboxChange={selectRowsHandler}
+            onChange={onChangeHandler}
           />
         )
         : <p>No transactions to show.</p>}

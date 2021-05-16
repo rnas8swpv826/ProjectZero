@@ -2,7 +2,18 @@ import React from 'react';
 import '../styles.css';
 
 const TransactionsTable = (props) => {
-  const { transactions, adding, deleting } = props;
+  const {
+    transactions,
+    accounts,
+    accountId,
+    categories,
+    categoryId,
+    subcategories,
+    subcategoryId,
+    adding,
+    deleting,
+    onChange,
+  } = props;
 
   const checkboxHandler = (event) => {
     props.onCheckboxChange(event.target.value);
@@ -34,7 +45,18 @@ const TransactionsTable = (props) => {
             <td className="amount-out-cell">{transaction.amount_out}</td>
           </tr>
         ))}
-        {adding && <AddTransactionRow />}
+        {adding
+          && (
+          <AddTransactionRow
+            accounts={accounts}
+            accountId={accountId}
+            categories={categories}
+            categoryId={categoryId}
+            subcategories={subcategories}
+            subcategoryId={subcategoryId}
+            onChange={onChange}
+          />
+          )}
       </tbody>
     </table>
   );
@@ -52,33 +74,55 @@ const TableHeader = () => (
   </>
 );
 
-const AddTransactionRow = () => (
-  <tr>
-    <td className="date-cell">
-      <input type="date" name="transactionDate" className="date-input" />
-    </td>
-    <td className="account-cell">
-      <input type="text" name="account" className="account-input" />
-      {/* To be changed to add dropdown */}
-    </td>
-    <td className="payee-cell">
-      <input type="text" name="payee" className="payee-input" />
-    </td>
-    <td className="category-cell">
-      <input type="text" name="category" className="category-input" />
-      {/* To be changed to add dropdown */}
-    </td>
-    <td className="category-cell">
-      <input type="text" name="subcategory" className="category-input" />
-      {/* To be changed to add dropdown */}
-    </td>
-    <td className="description-cell">
-      <input type="text" name="description" className="description-input" />
-    </td>
-    <td className="amount-out-cell">
-      <input type="text" name="amountOut" className="amount-out-input" />
-    </td>
-  </tr>
-);
+const AddTransactionRow = (props) => {
+  const {
+    accounts, accountId, categories, categoryId, subcategories, subcategoryId, onChange,
+  } = props;
+
+  return (
+    <tr>
+      <td className="date-cell">
+        <input type="date" name="transactionDate" className="date-input" />
+      </td>
+      <td className="account-cell">
+        <select name="accountId" className="account-select custom-select-sm" value={accountId} onChange={onChange}>
+          {accounts.map((account) => (
+            <option value={account.id} key={account.id}>{account.name}</option>
+          ))}
+        </select>
+      </td>
+      <td className="payee-cell">
+        <input type="text" name="payee" className="payee-input" />
+      </td>
+      <td className="category-cell">
+        <select name="categoryId" className="category-select custom-select-sm" value={categoryId} onChange={onChange}>
+          {categories.map((category) => (
+            <option value={category.id} key={category.id}>{category.name}</option>
+          ))}
+        </select>
+      </td>
+      <td className="category-cell">
+        <select
+          name="subcategoryId"
+          className="category-select custom-select-sm"
+          value={subcategoryId}
+          onChange={onChange}
+        >
+          {subcategories.map((subcategory) => (
+            (subcategory.parent_id === categoryId)
+              ? <option value={subcategory.id} key={subcategory.id}>{subcategory.name}</option>
+              : null
+          ))}
+        </select>
+      </td>
+      <td className="description-cell">
+        <input type="text" name="description" className="description-input" />
+      </td>
+      <td className="amount-out-cell">
+        <input type="text" name="amountOut" className="amount-out-input" />
+      </td>
+    </tr>
+  );
+};
 
 export default TransactionsTable;
