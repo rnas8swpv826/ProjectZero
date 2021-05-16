@@ -6,6 +6,9 @@ import ButtonsAndErrors from './ButtonsAndErrors';
 const Transactions = () => {
   const [transactions, setTransactions] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [adding, setAdding] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [selectedRows, setSelectedRows] = useState([]);
 
   // ---- Load Transactions ----
   const loadTransactions = useHttpRequest(
@@ -18,9 +21,20 @@ const Transactions = () => {
   }, []);
   // ------------
 
+  // ---- Add Transaction -----
+  const addTransactionHandler = () => {
+    setAdding(true);
+    setDeleting(false);
+    setMessages([]);
+  };
+  // ------------
+
   // ---- Delete Transactions ----
-  const [deleting, setDeleting] = useState(false);
-  const [selectedRows, setSelectedRows] = useState([]);
+  const deleteTransactionsHandler = () => {
+    setDeleting(true);
+    setAdding(false);
+    setMessages([]);
+  };
 
   const selectRowsHandler = (idOfChecked) => {
     if (!selectedRows.includes(idOfChecked)) {
@@ -32,29 +46,38 @@ const Transactions = () => {
     }
   };
 
-  const cancelClickHandler = () => {
-    if (deleting) {
-      setDeleting(false);
-      setSelectedRows([]);
-      setMessages([]);
-    }
-  };
-
   const body = { selected_rows: selectedRows };
 
   const deleteTransactions = useHttpRequest(
     { url: '/api/transactions', method: 'DELETE', body },
     (response) => setMessages([response.data]),
   );
+  // ------------
+
+  // ---- Save and Cancel Button Handlers ----
+  const cancelClickHandler = () => {
+    if (adding) {
+      setAdding(false);
+      setMessages([]);
+    } else if (deleting) {
+      setDeleting(false);
+      setSelectedRows([]);
+      setMessages([]);
+    }
+  };
 
   const saveClickHandler = () => {
-    if (selectedRows.length === 0) {
-      setMessages(['No transactions selected']);
-    } else {
-      deleteTransactions.sendRequest();
-      loadTransactions.sendRequest();
-      setMessages([]);
-      setDeleting(false);
+    if (adding) {
+      console.log('Adding a transaction. To be completed');
+    } else if (deleting) {
+      if (selectedRows.length === 0) {
+        setMessages(['No transactions selected']);
+      } else {
+        deleteTransactions.sendRequest();
+        loadTransactions.sendRequest();
+        setMessages([]);
+        setDeleting(false);
+      }
     }
   };
   // ------------
@@ -64,21 +87,30 @@ const Transactions = () => {
       <h1>Transactions</h1>
       <button
         type="button"
+        className="btn btn-primary mb-3 mr-2"
+        onClick={addTransactionHandler}
+      >
+        Add Transaction
+      </button>
+      <button
+        type="button"
         className="btn btn-outline-danger mb-3 mr-2"
-        onClick={() => setDeleting(true)}
-      >Delete Transactions
+        onClick={deleteTransactionsHandler}
+      >
+        Delete Transactions
       </button>
       {loadTransactions.isLoading && <p>Transactions are loading.</p>}
       {transactions.length > 0 && !loadTransactions.isLoading
         ? (
           <TransactionsTable
             transactions={transactions}
+            adding={adding}
             deleting={deleting}
             onCheckboxChange={selectRowsHandler}
           />
         )
         : <p>No transactions to show.</p>}
-      {deleting && (
+      {(deleting || adding) && (
       <ButtonsAndErrors
         messages={messages}
         onSaveClick={saveClickHandler}
