@@ -296,7 +296,8 @@ class Transactions extends React.Component {
     const selectTransactionSubcategoryOptions = (
       <select name="subcategoryId" onChange={this.onChange} className="category-select custom-select-sm" value={subcategoryId}>
         {subcategories.map((subcategory) => (
-          (subcategory.parent_id === categoryId)
+          // eslint-disable-next-line eqeqeq
+          (subcategory.parent_id == categoryId)
             ? <option value={subcategory.id} key={subcategory.id}>{subcategory.name}</option> : null
         ))}
       </select>
