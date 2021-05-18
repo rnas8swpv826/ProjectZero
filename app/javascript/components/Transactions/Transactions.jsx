@@ -6,12 +6,16 @@ import ButtonsAndErrors from './ButtonsAndErrors';
 const Transactions = () => {
   // Table Data
   const [transactions, setTransactions] = useState([]);
+  const [date, setDate] = useState('');
   const [accounts, setAccounts] = useState([]);
   const [accountId, setAccountId] = useState('');
+  const [payee, setPayee] = useState('');
   const [categories, setCategories] = useState([]);
   const [categoryId, setCategoryId] = useState('');
   const [subcategories, setSubcategories] = useState([]);
   const [subcategoryId, setSubcategoryId] = useState('');
+  const [description, setDescription] = useState('');
+  const [amountOut, setAmountOut] = useState('');
   // Other States
   const [messages, setMessages] = useState([]);
   const [adding, setAdding] = useState(false);
@@ -52,9 +56,14 @@ const Transactions = () => {
     if (cat.length > 0) {
       firstCategory = cat[0].id;
     }
+    let firstSubcategory = '';
+    if (subcat.length > 0) {
+      firstSubcategory = subcat[0].id;
+    }
     setCategories(cat);
     setSubcategories(subcat);
     setCategoryId(firstCategory);
+    setSubcategoryId(firstSubcategory);
   };
 
   const loadCategories = useHttpRequest(
@@ -75,6 +84,20 @@ const Transactions = () => {
     setDeleting(false);
     setMessages([]);
   };
+
+  const bodyPostRequest = {
+    transaction_date: date,
+    account_id: accountId,
+    payee,
+    category_id: subcategoryId,
+    description,
+    amount_out: amountOut,
+  };
+
+  const addTransaction = useHttpRequest(
+    { url: '/api/transactions', method: 'POST', body: bodyPostRequest },
+    (response) => console.log(response),
+  );
   // ------------
 
   // ---- Delete Transactions ----
@@ -94,10 +117,10 @@ const Transactions = () => {
     }
   };
 
-  const body = { selected_rows: selectedRows };
+  const bodyDeleteRequest = { selected_rows: selectedRows };
 
   const deleteTransactions = useHttpRequest(
-    { url: '/api/transactions', method: 'DELETE', body },
+    { url: '/api/transactions', method: 'DELETE', body: bodyDeleteRequest },
     (response) => setMessages([response.data]),
   );
   // ------------
@@ -116,7 +139,10 @@ const Transactions = () => {
 
   const saveClickHandler = () => {
     if (adding) {
-      console.log('Adding a transaction. To be completed');
+      addTransaction.sendRequest();
+      loadTransactions.sendRequest();
+      setMessages([]);
+      setAdding(false);
     } else if (deleting) {
       if (selectedRows.length === 0) {
         setMessages(['No transactions selected']);
@@ -132,14 +158,28 @@ const Transactions = () => {
 
   // ---- Set state after selecting dropdown option in table ----
   const onChangeHandler = (event) => {
-    if (event.target.name === 'accountId') {
+    if (event.target.name === 'date') {
+      setDate(event.target.value);
+    } else if (event.target.name === 'accountId') {
       setAccountId(event.target.value);
+    } else if (event.target.name === 'payee') {
+      setPayee(event.target.value);
     } else if (event.target.name === 'categoryId') {
       setCategoryId(event.target.value);
+      const newSubcategorylist = subcategories.filter(
+        // eslint-disable-next-line eqeqeq
+        (subcategory) => subcategory.parent_id == [event.target.value],
+      );
+      setSubcategoryId(newSubcategorylist[0].id);
     } else if (event.target.name === 'subcategoryId') {
       setSubcategoryId(event.target.value);
+    } else if (event.target.name === 'description') {
+      setDescription(event.target.value);
+    } else if (event.target.name === 'amountOut') {
+      setAmountOut(event.target.value);
     }
   };
+
   // ------------
 
   return (
@@ -164,12 +204,16 @@ const Transactions = () => {
         ? (
           <TransactionsTable
             transactions={transactions}
+            date={date}
             accounts={accounts}
             accountId={accountId}
+            payee={payee}
             categories={categories}
             categoryId={categoryId}
             subcategories={subcategories}
             subcategoryId={subcategoryId}
+            description={description}
+            amountOut={amountOut}
             adding={adding}
             deleting={deleting}
             onCheckboxChange={selectRowsHandler}

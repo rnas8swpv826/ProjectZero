@@ -4,12 +4,16 @@ import '../styles.css';
 const TransactionsTable = (props) => {
   const {
     transactions,
+    date,
     accounts,
     accountId,
+    payee,
     categories,
     categoryId,
     subcategories,
     subcategoryId,
+    description,
+    amountOut,
     adding,
     deleting,
     onChange,
@@ -48,12 +52,16 @@ const TransactionsTable = (props) => {
         {adding
           && (
           <AddTransactionRow
+            date={date}
             accounts={accounts}
             accountId={accountId}
+            payee={payee}
             categories={categories}
             categoryId={categoryId}
             subcategories={subcategories}
             subcategoryId={subcategoryId}
+            description={description}
+            amountOut={amountOut}
             onChange={onChange}
           />
           )}
@@ -76,13 +84,23 @@ const TableHeader = () => (
 
 const AddTransactionRow = (props) => {
   const {
-    accounts, accountId, categories, categoryId, subcategories, subcategoryId, onChange,
+    date,
+    accounts,
+    accountId,
+    payee,
+    categories,
+    categoryId,
+    subcategories,
+    subcategoryId,
+    description,
+    amountOut,
+    onChange,
   } = props;
 
   return (
     <tr>
       <td className="date-cell">
-        <input type="date" name="transactionDate" className="date-input" />
+        <input type="date" name="date" className="date-input" value={date} onChange={onChange} />
       </td>
       <td className="account-cell">
         <select name="accountId" className="account-select custom-select-sm" value={accountId} onChange={onChange}>
@@ -92,7 +110,7 @@ const AddTransactionRow = (props) => {
         </select>
       </td>
       <td className="payee-cell">
-        <input type="text" name="payee" className="payee-input" />
+        <input type="text" name="payee" className="payee-input" value={payee} onChange={onChange} />
       </td>
       <td className="category-cell">
         <select name="categoryId" className="category-select custom-select-sm" value={categoryId} onChange={onChange}>
@@ -109,17 +127,17 @@ const AddTransactionRow = (props) => {
           onChange={onChange}
         >
           {subcategories.map((subcategory) => (
-            (subcategory.parent_id === categoryId)
-              ? <option value={subcategory.id} key={subcategory.id}>{subcategory.name}</option>
-              : null
+            // eslint-disable-next-line eqeqeq
+            (subcategory.parent_id == categoryId)
+            && <option value={subcategory.id} key={subcategory.id}>{subcategory.name}</option>
           ))}
         </select>
       </td>
       <td className="description-cell">
-        <input type="text" name="description" className="description-input" />
+        <input type="text" name="description" className="description-input" value={description} onChange={onChange} />
       </td>
       <td className="amount-out-cell">
-        <input type="text" name="amountOut" className="amount-out-input" />
+        <input type="text" name="amountOut" className="amount-out-input" value={amountOut} onChange={onChange} />
       </td>
     </tr>
   );
