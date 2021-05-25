@@ -139,16 +139,14 @@ const Transactions = () => {
 
   const saveClickHandler = () => {
     if (adding) {
-      addTransaction.sendRequest();
-      loadTransactions.sendRequest();
+      addTransaction.sendRequest().then(() => loadTransactions.sendRequest());
       setMessages([]);
       setAdding(false);
     } else if (deleting) {
       if (selectedRows.length === 0) {
         setMessages(['No transactions selected']);
       } else {
-        deleteTransactions.sendRequest();
-        loadTransactions.sendRequest();
+        deleteTransactions.sendRequest().then(() => loadTransactions.sendRequest());
         setMessages([]);
         setDeleting(false);
       }
