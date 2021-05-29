@@ -2,12 +2,12 @@ import { useState } from 'react';
 
 const useHttpRequest = (requestParams, dataTransformation) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [errors, setErrors] = useState([]);
   const { url, method, body } = requestParams;
 
   const sendRequest = async () => {
     setIsLoading(true);
-    setError(null);
+    setErrors([]);
     const token = document.querySelector("meta[name='csrf-token']").content;
     try {
       const response = await fetch(
@@ -22,21 +22,31 @@ const useHttpRequest = (requestParams, dataTransformation) => {
       );
       // Config above defaults to GET request without headers and body
       if (!response.ok) {
-        throw new Error('Network error.');
+        throw response;
       }
 
       const data = await response.json();
       dataTransformation(data);
     } catch (err) {
-      // setError(err.message || 'Something went wrong!'); // Error isn't setting properly
-      console.log(err.json());
+      err.json().then((response) => {
+        const keys = Object.keys(response.data);
+        if (keys.includes('transaction_date')) {
+          setErrors((prevState) => [...prevState, `Date ${response.data.transaction_date}`]);
+        }
+        if (keys.includes('payee')) {
+          setErrors((prevState) => [...prevState, `Payee ${response.data.payee}`]);
+        }
+        if (keys.includes('amount_out')) {
+          setErrors((prevState) => [...prevState, `Amount out ${response.data.amount_out}`]);
+        }
+      });
     }
     setIsLoading(false);
   };
 
   return {
     isLoading,
-    error,
+    errors,
     sendRequest,
   };
 };

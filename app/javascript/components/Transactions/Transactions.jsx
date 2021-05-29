@@ -94,10 +94,27 @@ const Transactions = () => {
     amount_out: amountOut,
   };
 
+  const successfulAddTransaction = () => {
+    loadTransactions.sendRequest();
+    loadAccounts.sendRequest();
+    loadCategories.sendRequest();
+    setDate('');
+    setPayee('');
+    setDescription('');
+    setAmountOut('');
+    setMessages([]);
+    setAdding(false);
+  };
+
   const addTransaction = useHttpRequest(
     { url: '/api/transactions', method: 'POST', body: bodyPostRequest },
-    (response) => console.log(response),
+    successfulAddTransaction,
   );
+
+  useEffect(() => {
+    setMessages(addTransaction.errors);
+  }, [addTransaction.errors]); // Sets error messages if transaction adding is not sucessful.
+  // The adding & table data states remain unchanged that the user can correct the issue
   // ------------
 
   // ---- Delete Transactions ----
@@ -139,9 +156,7 @@ const Transactions = () => {
 
   const saveClickHandler = () => {
     if (adding) {
-      addTransaction.sendRequest().then(() => loadTransactions.sendRequest());
-      setMessages([]);
-      setAdding(false);
+      addTransaction.sendRequest();
     } else if (deleting) {
       if (selectedRows.length === 0) {
         setMessages(['No transactions selected']);
