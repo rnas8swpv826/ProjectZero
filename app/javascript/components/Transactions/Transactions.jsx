@@ -6,6 +6,7 @@ import ButtonsAndErrors from './ButtonsAndErrors';
 const Transactions = () => {
   // Table Data
   const [transactions, setTransactions] = useState([]);
+  const [transactionId, setTransactionId] = useState('');
   const [date, setDate] = useState('');
   const [accounts, setAccounts] = useState([]);
   const [accountId, setAccountId] = useState('');
@@ -19,6 +20,7 @@ const Transactions = () => {
   // Other States
   const [messages, setMessages] = useState([]);
   const [adding, setAdding] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
 
@@ -81,6 +83,7 @@ const Transactions = () => {
   // ---- Add Transaction -----
   const addTransactionHandler = () => {
     setAdding(true);
+    setUpdating(false);
     setDeleting(false);
     setMessages([]);
   };
@@ -114,13 +117,34 @@ const Transactions = () => {
   useEffect(() => {
     setMessages(addTransaction.errors);
   }, [addTransaction.errors]); // Sets error messages if transaction adding is not sucessful.
-  // The adding & table data states remain unchanged that the user can correct the issue
+  // The adding & table data states remain unchanged so that the user can correct the issue
+  // ------------
+
+  // ---- Update Transaction
+  const updatingHandler = (state, transaction) => {
+    if (state) {
+      setUpdating(true);
+      setAdding(false);
+      setDeleting(false);
+      setMessages([]);
+      setTransactionId(transaction.id);
+      setDate(transaction.transaction_date);
+      setAccountId(transaction.account_id);
+      setPayee(transaction.payee);
+      setCategoryId(transaction.category_id);
+      setSubcategoryId(transaction.subcategory_id);
+      setDescription(transaction.description);
+      setAmountOut(transaction.amount_out);
+    }
+  };
+
   // ------------
 
   // ---- Delete Transactions ----
   const deleteTransactionsHandler = () => {
     setDeleting(true);
     setAdding(false);
+    setUpdating(false);
     setMessages([]);
   };
 
@@ -169,7 +193,7 @@ const Transactions = () => {
   };
   // ------------
 
-  // ---- Set state after selecting dropdown option in table ----
+  // ---- Set state after input or select in table ----
   const onChangeHandler = (event) => {
     if (event.target.name === 'date') {
       setDate(event.target.value);
@@ -217,6 +241,7 @@ const Transactions = () => {
         ? (
           <TransactionsTable
             transactions={transactions}
+            transactionId={transactionId}
             date={date}
             accounts={accounts}
             accountId={accountId}
@@ -228,9 +253,11 @@ const Transactions = () => {
             description={description}
             amountOut={amountOut}
             adding={adding}
+            updating={updating}
             deleting={deleting}
             onCheckboxChange={selectRowsHandler}
             onChange={onChangeHandler}
+            onUpdating={updatingHandler}
           />
         )
         : <p>No transactions to show.</p>}
