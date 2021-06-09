@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { HashLink as Link } from 'react-router-hash-link';
 import useHttpRequest from '../hooks/useHttpRequest';
 import TransactionsTable from './TransactionsTable';
 import ButtonsAndErrors from './ButtonsAndErrors';
@@ -252,7 +253,7 @@ const Transactions = () => {
 
   return (
     <div className="container">
-      <h1>Transactions</h1>
+      <h1 id="top">Transactions</h1>
       <button
         type="button"
         className="btn btn-primary mb-3 mr-2"
@@ -267,6 +268,7 @@ const Transactions = () => {
       >
         Delete Transactions
       </button>
+      <Link to="/" className="btn btn-outline-primary mb-3">Back to Home</Link>
       {loadTransactions.isLoading && <p>Transactions are loading.</p>}
       {transactions.length > 0 && !loadTransactions.isLoading
         ? (
@@ -299,6 +301,7 @@ const Transactions = () => {
         onCancelClick={cancelClickHandler}
       />
       )}
+      <Link to="#top">Scroll to top</Link>
     </div>
   );
 };
