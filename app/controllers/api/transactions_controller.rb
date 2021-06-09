@@ -57,7 +57,7 @@ class Api::TransactionsController < ApplicationController
     }
     else
       render json: {
-        data: "Cannot update."
+        data: transaction.errors
       }, status: :unprocessable_entity
     end
   end

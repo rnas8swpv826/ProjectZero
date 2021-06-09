@@ -80,15 +80,29 @@ const Transactions = () => {
   }, []);
   // ------------
 
-  // ---- Add Transaction -----
+  // ---- Reset transaction in memory after successful request or cancellation ----
+  const resetTxInMemory = () => {
+    setMessages([]);
+    setTransactionId('');
+    setDate('');
+    setAccountId('');
+    setPayee('');
+    setDescription('');
+    setAmountOut('');
+    loadAccounts.sendRequest();
+    loadCategories.sendRequest();
+  };
+  // ------------
+
+  // ---- Add or Update Transaction -----
   const addTransactionHandler = () => {
     setAdding(true);
     setUpdating(false);
     setDeleting(false);
-    setMessages([]);
+    resetTxInMemory();
   };
 
-  const bodyPostRequest = {
+  const bodyRequest = {
     transaction_date: date,
     account_id: accountId,
     payee,
@@ -97,32 +111,38 @@ const Transactions = () => {
     amount_out: amountOut,
   };
 
-  const successfulAddTransaction = () => {
+  const successfulAddUpdateTransaction = () => {
     loadTransactions.sendRequest();
-    loadAccounts.sendRequest();
-    loadCategories.sendRequest();
-    setDate('');
-    setPayee('');
-    setDescription('');
-    setAmountOut('');
-    setMessages([]);
+    resetTxInMemory();
     setAdding(false);
+    setUpdating(false);
   };
 
   const addTransaction = useHttpRequest(
-    { url: '/api/transactions', method: 'POST', body: bodyPostRequest },
-    successfulAddTransaction,
+    { url: '/api/transactions', method: 'POST', body: bodyRequest },
+    successfulAddUpdateTransaction,
+  );
+
+  const updateTransaction = useHttpRequest(
+    { url: `/api/transactions/${transactionId}`, method: 'PATCH', body: bodyRequest },
+    successfulAddUpdateTransaction,
   );
 
   useEffect(() => {
     setMessages(addTransaction.errors);
-  }, [addTransaction.errors]); // Sets error messages if transaction adding is not sucessful.
-  // The adding & table data states remain unchanged so that the user can correct the issue
+  }, [addTransaction.errors]);
+
+  useEffect(() => {
+    setMessages(updateTransaction.errors);
+  }, [updateTransaction.errors]);
+  // Sets error messages if transaction adding or updating is not sucessful.
+  // The adding, updating & table data states remain unchanged
+  // so that the user can correct the issue.
   // ------------
 
   // ---- Update Transaction
-  const updatingHandler = (state, transaction) => {
-    if (state) {
+  const updatingHandler = (active, transaction) => {
+    if (active) {
       setUpdating(true);
       setAdding(false);
       setDeleting(false);
@@ -137,7 +157,6 @@ const Transactions = () => {
       setAmountOut(transaction.amount_out);
     }
   };
-
   // ------------
 
   // ---- Delete Transactions ----
@@ -160,17 +179,27 @@ const Transactions = () => {
 
   const bodyDeleteRequest = { selected_rows: selectedRows };
 
+  const successfulDeleteTransaction = () => {
+    setDeleting(false);
+    loadTransactions.sendRequest();
+    resetTxInMemory();
+  };
+
   const deleteTransactions = useHttpRequest(
     { url: '/api/transactions', method: 'DELETE', body: bodyDeleteRequest },
-    (response) => setMessages([response.data]),
+    successfulDeleteTransaction,
   );
   // ------------
 
   // ---- Save and Cancel Button Handlers ----
+
   const cancelClickHandler = () => {
     if (adding) {
       setAdding(false);
-      setMessages([]);
+      resetTxInMemory();
+    } else if (updating) {
+      setUpdating(false);
+      resetTxInMemory();
     } else if (deleting) {
       setDeleting(false);
       setSelectedRows([]);
@@ -181,11 +210,13 @@ const Transactions = () => {
   const saveClickHandler = () => {
     if (adding) {
       addTransaction.sendRequest();
+    } else if (updating) {
+      updateTransaction.sendRequest();
     } else if (deleting) {
       if (selectedRows.length === 0) {
         setMessages(['No transactions selected']);
       } else {
-        deleteTransactions.sendRequest().then(() => loadTransactions.sendRequest());
+        deleteTransactions.sendRequest();
         setMessages([]);
         setDeleting(false);
       }
@@ -261,7 +292,7 @@ const Transactions = () => {
           />
         )
         : <p>No transactions to show.</p>}
-      {(deleting || adding) && (
+      {(adding || deleting || updating) && (
       <ButtonsAndErrors
         messages={messages}
         onSaveClick={saveClickHandler}
