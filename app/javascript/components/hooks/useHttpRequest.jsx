@@ -30,6 +30,7 @@ const useHttpRequest = (requestParams, dataTransformation) => {
     } catch (err) {
       err.json().then((response) => {
         const keys = Object.keys(response.data);
+        // Errors for Transactions component
         if (keys.includes('transaction_date')) {
           setErrors((prevState) => [...prevState, `Date ${response.data.transaction_date}`]);
         }
@@ -38,6 +39,10 @@ const useHttpRequest = (requestParams, dataTransformation) => {
         }
         if (keys.includes('amount_out')) {
           setErrors((prevState) => [...prevState, `Amount out ${response.data.amount_out}`]);
+        }
+        // Error for Accounts component
+        if (keys.includes('name')) {
+          setErrors((prevState) => [...prevState, `Name ${response.data.name}`]);
         }
       });
     }
