@@ -21,7 +21,7 @@ class Api::AccountsController < ApplicationController
     account = Account.find(params['id'])
     if account.update(account_params)
       render json: {
-        data: "Category successfully updated."
+        data: "Account successfully updated."
     }
     else
       render json: {
@@ -34,7 +34,7 @@ class Api::AccountsController < ApplicationController
     account = Account.find(params['id'])
     if account.destroy
       render json: {
-        data: "Category successfully deleted."
+        data: "Account successfully deleted."
       }
     else
       render json: {
