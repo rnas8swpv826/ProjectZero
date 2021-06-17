@@ -5,6 +5,7 @@ import useHttpRequest from '../hooks/useHttpRequest';
 const Accounts = () => {
   const [accounts, setAccounts] = useState([]);
   const [adding, setAdding] = useState(true);
+  const [renaming, setRenaming] = useState(false);
   const [messages, setMessages] = useState([]);
 
   // ---- Manage name and id state of each account ----
@@ -12,8 +13,14 @@ const Accounts = () => {
 
   const accountReducer = (state, action) => {
     if (action.type === 'INPUT') {
-      return { name: action.value };
+      return { name: action.value, id: state.id };
+    } if (action.type === 'RENAME') {
+      setRenaming(true);
+      setAdding(false);
+      return { name: action.value.name, id: action.value.id };
     } if (action.type === 'RESET') {
+      setAdding(true);
+      setRenaming(false);
       return { name: '', id: '' };
     }
     return { name: '', id: '' };
@@ -34,15 +41,14 @@ const Accounts = () => {
   // ------------
 
   // ---- Add new account ----
-  const successfulAddUpdateAccount = () => {
+  const successfulAddRenameAccount = () => {
     loadAccounts.sendRequest();
     dispatchAccount({ type: 'RESET' });
-    setAdding(true);
   };
 
   const addAccount = useHttpRequest(
-    { url: 'api/accounts', method: 'POST', body: { name: account.name } },
-    successfulAddUpdateAccount,
+    { url: 'api/accounts', method: 'POST', body: account },
+    successfulAddRenameAccount,
   );
 
   useEffect(() => {
@@ -50,6 +56,24 @@ const Accounts = () => {
   }, [addAccount.errors]);
   // ------------
 
+  // ---- Rename an existing account ----
+  const cancelRenameHandler = () => {
+    dispatchAccount({ type: 'RESET' });
+  };
+
+  const renameHandler = (item) => {
+    dispatchAccount({ type: 'RENAME', value: item });
+  };
+
+  const renameAccount = useHttpRequest(
+    { url: `/api/accounts/${account.id}`, method: 'PATCH', body: account },
+    successfulAddRenameAccount,
+  );
+
+  useEffect(() => {
+    setMessages(renameAccount.errors);
+  }, [renameAccount.errors]);
+  // ------------
   return (
     <div className="container mt-3">
       <h2 className="mb-3">Add a New Account</h2>
@@ -64,23 +88,32 @@ const Accounts = () => {
       <h6 className="text-danger">{messages.join('. ')}</h6>
       {adding
           && (
-          <button type="button" className="btn btn-primary mb-3 mr-2" onClick={() => addAccount.sendRequest()}>
+          <button type="button" className="btn btn-primary mb-3 mr-1" onClick={() => addAccount.sendRequest()}>
             Add Account
           </button>
           )}
-      <Link to="/" className="btn btn-outline-primary mb-3 mr-2">Back to Home</Link>
+      {renaming
+        && (
+        <button type="button" className="btn btn-primary mb-3 mr-1" onClick={() => renameAccount.sendRequest()}>
+          Save
+        </button>
+        )}
+      {renaming
+        && (
+          <button type="button" className="btn btn-secondary mb-3 mr-1" onClick={cancelRenameHandler}>
+            Cancel
+          </button>
+        )}
+      <Link to="/" className="btn btn-outline-primary mb-3 mr-1">Back to Home</Link>
       <Link to="/transactions" className="btn btn-outline-primary mb-3">Back to Transactions</Link>
 
       <h2>Existing Accounts</h2>
       {accounts.map((item) => (
         <div key={item.id} className="container">
           <div className="row">
+            <div className="col-sm-3"><span>{item.name}</span></div>
             <div className="col-sm-3">
-              <span>{item.name}</span>
-            </div>
-            <div className="col-sm-3">
-              <button type="button" className="btn btn-link rename-delete-btn">
-                {/* Add onClick */}
+              <button type="button" className="btn btn-link rename-delete-btn" onClick={() => renameHandler(item)}>
                 Rename
               </button>
             </div>
