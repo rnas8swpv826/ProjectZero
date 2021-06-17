@@ -25,7 +25,7 @@ class Api::AccountsController < ApplicationController
     }
     else
       render json: {
-        data: "Cannot update."
+        data: account.errors
       }, status: :unprocessable_entity
     end
   end

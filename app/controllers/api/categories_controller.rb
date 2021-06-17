@@ -25,7 +25,7 @@ class Api::CategoriesController < ApplicationController
     }
     else
       render json: {
-        data: "Cannot update."
+        data: category.errors
       }, status: :unprocessable_entity
     end
   end
