@@ -1,13 +1,17 @@
 import React, { useEffect, useState, useReducer } from 'react';
 import { HashLink as Link } from 'react-router-hash-link';
+import $ from 'jquery'; // To remove Modal backdrop
 import useHttpRequest from '../hooks/useHttpRequest';
+import Modal from './Modal';
 
 const Accounts = () => {
   const [accounts, setAccounts] = useState([]);
   const [adding, setAdding] = useState(true);
   const [renaming, setRenaming] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [displayModal, setDisplayModal] = useState(false);
 
+  console.log(displayModal);
   // ---- Manage name and id state of each account ----
   const initAccount = { name: '', id: '' };
 
@@ -17,6 +21,9 @@ const Accounts = () => {
     } if (action.type === 'RENAME') {
       setRenaming(true);
       setAdding(false);
+      return { name: action.value.name, id: action.value.id };
+    } if (action.type === 'DELETE') {
+      setDisplayModal(true);
       return { name: action.value.name, id: action.value.id };
     } if (action.type === 'RESET') {
       setAdding(true);
@@ -74,8 +81,34 @@ const Accounts = () => {
     setMessages(renameAccount.errors);
   }, [renameAccount.errors]);
   // ------------
+
+  // ---- Delete an account ----
+  const successfulDeleteAccount = () => {
+    $('#deleteConfirmation').modal('hide'); // Remove Modal backdrop
+    setDisplayModal(false);
+    dispatchAccount({ type: 'RESET' });
+    loadAccounts.sendRequest();
+  };
+
+  const deleteAccount = useHttpRequest(
+    { url: `/api/accounts/${account.id}`, method: 'DELETE', body: account },
+    successfulDeleteAccount,
+  );
+
+  const deleteHandler = (item) => {
+    dispatchAccount({ type: 'DELETE', value: item });
+  };
+  // ------------
+
   return (
     <div className="container mt-3">
+      {displayModal
+        && (
+        <Modal
+          name={account.name}
+          onDeleteConfirmation={() => deleteAccount.sendRequest()}
+        />
+        )}
       <h2 className="mb-3">Add a New Account</h2>
       <h6>Name</h6>
       <input
@@ -83,15 +116,15 @@ const Accounts = () => {
         type="text"
         name="name"
         onChange={(event) => dispatchAccount({ type: 'INPUT', value: event.target.value })}
-        value={account.name}
+        value={(adding || renaming) ? account.name : null}
       />
       <h6 className="text-danger">{messages.join('. ')}</h6>
       {adding
-          && (
-          <button type="button" className="btn btn-primary mb-3 mr-1" onClick={() => addAccount.sendRequest()}>
-            Add Account
-          </button>
-          )}
+        && (
+        <button type="button" className="btn btn-primary mb-3 mr-1" onClick={() => addAccount.sendRequest()}>
+          Add Account
+        </button>
+        )}
       {renaming
         && (
         <button type="button" className="btn btn-primary mb-3 mr-1" onClick={() => renameAccount.sendRequest()}>
@@ -118,8 +151,13 @@ const Accounts = () => {
               </button>
             </div>
             <div className="col-sm-3">
-              <button type="button" className="btn btn-link rename-delete-btn">
-                {/* Add onClick */}
+              <button
+                type="button"
+                className="btn btn-link rename-delete-btn"
+                data-toggle="modal"
+                data-target="#deleteConfirmation"
+                onClick={() => deleteHandler(item)}
+              >
                 Delete
               </button>
             </div>
