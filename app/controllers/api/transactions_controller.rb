@@ -1,5 +1,4 @@
 class Api::TransactionsController < ApplicationController
-  skip_before_action :verify_authenticity_token # To be removed
 
   def index
     transactions = Transaction.all

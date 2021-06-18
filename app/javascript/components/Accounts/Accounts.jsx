@@ -11,7 +11,6 @@ const Accounts = () => {
   const [messages, setMessages] = useState([]);
   const [displayModal, setDisplayModal] = useState(false);
 
-  console.log(displayModal);
   // ---- Manage name and id state of each account ----
   const initAccount = { name: '', id: '' };
 
