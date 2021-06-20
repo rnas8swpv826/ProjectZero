@@ -100,7 +100,7 @@ const Accounts = () => {
   // ------------
 
   return (
-    <div className="container mt-3">
+    <div className="container">
       {displayModal
         && (
         <Modal
@@ -108,10 +108,10 @@ const Accounts = () => {
           onDeleteConfirmation={() => deleteAccount.sendRequest()}
         />
         )}
-      <h2 className="mb-3">Add a New Account</h2>
+      <h2>Add a New Account</h2>
       <h6>Name</h6>
       <input
-        className="form-control mb-3"
+        className="form-control"
         type="text"
         name="name"
         onChange={(event) => dispatchAccount({ type: 'INPUT', value: event.target.value })}
@@ -120,24 +120,23 @@ const Accounts = () => {
       <h6 className="text-danger">{messages.join('. ')}</h6>
       {adding
         && (
-        <button type="button" className="btn btn-primary mb-3 mr-1" onClick={() => addAccount.sendRequest()}>
+        <button type="button" className="btn btn-primary" onClick={() => addAccount.sendRequest()}>
           Add Account
         </button>
         )}
       {renaming
         && (
-        <button type="button" className="btn btn-primary mb-3 mr-1" onClick={() => renameAccount.sendRequest()}>
-          Save
-        </button>
+          <div>
+            <button type="button" className="btn btn-primary" onClick={() => renameAccount.sendRequest()}>
+              Save
+            </button>
+            <button type="button" className="btn btn-secondary" onClick={cancelRenameHandler}>
+              Cancel
+            </button>
+          </div>
         )}
-      {renaming
-        && (
-          <button type="button" className="btn btn-secondary mb-3 mr-1" onClick={cancelRenameHandler}>
-            Cancel
-          </button>
-        )}
-      <Link to="/" className="btn btn-outline-primary mb-3 mr-1">Back to Home</Link>
-      <Link to="/transactions" className="btn btn-outline-primary mb-3">Back to Transactions</Link>
+      <Link to="/" className="btn btn-outline-primary">Back to Home</Link>
+      <Link to="/transactions" className="btn btn-outline-primary">Back to Transactions</Link>
 
       <h2>Existing Accounts</h2>
       {accounts.map((item) => (

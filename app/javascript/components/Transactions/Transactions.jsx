@@ -254,21 +254,13 @@ const Transactions = () => {
   return (
     <div className="container">
       <h1 id="top">Transactions</h1>
-      <button
-        type="button"
-        className="btn btn-primary mb-3 mr-2"
-        onClick={addTransactionHandler}
-      >
+      <button type="button" className="btn btn-primary" onClick={addTransactionHandler}>
         Add Transaction
       </button>
-      <button
-        type="button"
-        className="btn btn-outline-danger mb-3 mr-2"
-        onClick={deleteTransactionsHandler}
-      >
+      <button type="button" className="btn btn-outline-danger" onClick={deleteTransactionsHandler}>
         Delete Transactions
       </button>
-      <Link to="/" className="btn btn-outline-primary mb-3">Back to Home</Link>
+      <Link to="/" className="btn btn-outline-primary">Back to Home</Link>
       {loadTransactions.isLoading && <p>Transactions are loading.</p>}
       {transactions.length > 0 && !loadTransactions.isLoading
         ? (
