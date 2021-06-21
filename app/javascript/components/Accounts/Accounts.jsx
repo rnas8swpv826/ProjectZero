@@ -3,6 +3,7 @@ import { HashLink as Link } from 'react-router-hash-link';
 import $ from 'jquery'; // To remove Modal backdrop
 import useHttpRequest from '../hooks/useHttpRequest';
 import Modal from './Modal';
+import Item from './Item';
 
 const Accounts = () => {
   const [accounts, setAccounts] = useState([]);
@@ -126,41 +127,21 @@ const Accounts = () => {
         )}
       {renaming
         && (
-          <div>
+          <>
             <button type="button" className="btn btn-primary" onClick={() => renameAccount.sendRequest()}>
               Save
             </button>
             <button type="button" className="btn btn-secondary" onClick={cancelRenameHandler}>
               Cancel
             </button>
-          </div>
+          </>
         )}
       <Link to="/" className="btn btn-outline-primary">Back to Home</Link>
       <Link to="/transactions" className="btn btn-outline-primary">Back to Transactions</Link>
 
       <h2>Existing Accounts</h2>
       {accounts.map((item) => (
-        <div key={item.id} className="container">
-          <div className="row">
-            <div className="col-sm-3"><span>{item.name}</span></div>
-            <div className="col-sm-3">
-              <button type="button" className="btn btn-link rename-delete-btn" onClick={() => renameHandler(item)}>
-                Rename
-              </button>
-            </div>
-            <div className="col-sm-3">
-              <button
-                type="button"
-                className="btn btn-link rename-delete-btn"
-                data-toggle="modal"
-                data-target="#deleteConfirmation"
-                onClick={() => deleteHandler(item)}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <Item item={item} onRename={renameHandler} onDelete={deleteHandler} />
       ))}
     </div>
   );
