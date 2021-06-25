@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
 import { HashLink as Link } from 'react-router-hash-link';
 import useHttpRequest from '../hooks/useHttpRequest';
 import TransactionsTable from './TransactionsTable';
@@ -7,23 +7,117 @@ import ButtonsAndErrors from './ButtonsAndErrors';
 const Transactions = () => {
   // Table Data
   const [transactions, setTransactions] = useState([]);
-  const [transactionId, setTransactionId] = useState('');
-  const [date, setDate] = useState('');
   const [accounts, setAccounts] = useState([]);
-  const [accountId, setAccountId] = useState('');
-  const [payee, setPayee] = useState('');
   const [categories, setCategories] = useState([]);
-  const [categoryId, setCategoryId] = useState('');
   const [subcategories, setSubcategories] = useState([]);
-  const [subcategoryId, setSubcategoryId] = useState('');
-  const [description, setDescription] = useState('');
-  const [amountOut, setAmountOut] = useState('');
   // Other States
   const [messages, setMessages] = useState([]);
   const [adding, setAdding] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
+
+  // ---- Reducer for transaction (tx for short) ----
+  const initTx = {
+    transactionId: '',
+    date: '',
+    accountId: '',
+    payee: '',
+    categoryId: '',
+    subcategoryId: '',
+    description: '',
+    amountOut: '',
+  };
+
+  const txReducer = (state, action) => {
+    switch (action.type) {
+      case 'INIT_ACCOUNT':
+        return { ...state, accountId: action.value };
+      case 'INIT_CATEGORY':
+        return {
+          ...state,
+          categoryId: action.value.category,
+          subcategoryId: action.value.category,
+        };
+      case 'UPDATING_CLICK':
+        return {
+          transactionId: action.value.id,
+          date: action.value.transaction_date,
+          accountId: action.value.account_id,
+          payee: action.value.payee,
+          categoryId: action.value.category_id,
+          subcategoryId: action.value.subcategory_id,
+          description: action.value.description,
+          amountOut: action.value.amount_out,
+        };
+      case 'DATE':
+        return {
+          ...state,
+          date: action.value,
+        };
+      case 'ACCOUNT_ID':
+        return {
+          ...state,
+          accountId: action.value,
+        };
+      case 'PAYEE':
+        return {
+          ...state,
+          payee: action.value,
+        };
+      case 'CATEGORY_ID': {
+        const newSubcategorylist = subcategories.filter(
+          // eslint-disable-next-line eqeqeq
+          (subcategory) => subcategory.parent_id == action.value,
+        );
+        return {
+          ...state,
+          categoryId: action.value,
+          subcategoryId: newSubcategorylist[0].id,
+        };
+      }
+      case 'SUBCATEGORY_ID':
+        return {
+          ...state,
+          subcategoryId: action.value,
+        };
+      case 'DESCRIPTION':
+        return {
+          ...state,
+          description: action.value,
+        };
+      case 'AMOUNT_OUT':
+        return {
+          ...state,
+          amountOut: action.value,
+        };
+      case 'RESET':
+        return {
+          transactionId: '',
+          date: '',
+          accountId: '',
+          payee: '',
+          categoryId: '',
+          subcategoryId: '',
+          description: '',
+          amountOut: '',
+        };
+      default:
+        return {
+          transactionId: '',
+          date: '',
+          accountId: '',
+          payee: '',
+          categoryId: '',
+          subcategoryId: '',
+          description: '',
+          amountOut: '',
+        };
+    }
+  };
+
+  const [tx, dispatchTx] = useReducer(txReducer, initTx);
+  // ------------
 
   // ---- Load Transactions, Accounts and Categories ----
   const loadTransactions = useHttpRequest(
@@ -36,7 +130,7 @@ const Transactions = () => {
     if (data.length > 0) {
       firstAccount = data[0].id;
     }
-    setAccountId(firstAccount);
+    dispatchTx({ type: 'INIT_ACCOUNT', value: firstAccount });
     setAccounts(data);
   };
 
@@ -65,8 +159,10 @@ const Transactions = () => {
     }
     setCategories(cat);
     setSubcategories(subcat);
-    setCategoryId(firstCategory);
-    setSubcategoryId(firstSubcategory);
+    dispatchTx({
+      type: 'INIT_CATEGORY',
+      value: { category: firstCategory, subcategory: firstSubcategory },
+    });
   };
 
   const loadCategories = useHttpRequest(
@@ -84,12 +180,7 @@ const Transactions = () => {
   // ---- Reset transaction in memory after successful request or cancellation ----
   const resetTxInMemory = () => {
     setMessages([]);
-    setTransactionId('');
-    setDate('');
-    setAccountId('');
-    setPayee('');
-    setDescription('');
-    setAmountOut('');
+    dispatchTx({ type: 'RESET' });
     loadAccounts.sendRequest();
     loadCategories.sendRequest();
   };
@@ -104,12 +195,12 @@ const Transactions = () => {
   };
 
   const bodyRequest = {
-    transaction_date: date,
-    account_id: accountId,
-    payee,
-    category_id: subcategoryId,
-    description,
-    amount_out: amountOut,
+    transaction_date: tx.date,
+    account_id: tx.accountId,
+    payee: tx.payee,
+    category_id: tx.subcategoryId,
+    description: tx.description,
+    amount_out: tx.amountOut,
   };
 
   const successfulAddUpdateTransaction = () => {
@@ -125,7 +216,7 @@ const Transactions = () => {
   );
 
   const updateTransaction = useHttpRequest(
-    { url: `/api/transactions/${transactionId}`, method: 'PATCH', body: bodyRequest },
+    { url: `/api/transactions/${tx.transactionId}`, method: 'PATCH', body: bodyRequest },
     successfulAddUpdateTransaction,
   );
 
@@ -148,14 +239,7 @@ const Transactions = () => {
       setAdding(false);
       setDeleting(false);
       setMessages([]);
-      setTransactionId(transaction.id);
-      setDate(transaction.transaction_date);
-      setAccountId(transaction.account_id);
-      setPayee(transaction.payee);
-      setCategoryId(transaction.category_id);
-      setSubcategoryId(transaction.subcategory_id);
-      setDescription(transaction.description);
-      setAmountOut(transaction.amount_out);
+      dispatchTx({ type: 'UPDATING_CLICK', value: transaction });
     }
   };
   // ------------
@@ -227,28 +311,8 @@ const Transactions = () => {
 
   // ---- Set state after input or select in table ----
   const onChangeHandler = (event) => {
-    if (event.target.name === 'date') {
-      setDate(event.target.value);
-    } else if (event.target.name === 'accountId') {
-      setAccountId(event.target.value);
-    } else if (event.target.name === 'payee') {
-      setPayee(event.target.value);
-    } else if (event.target.name === 'categoryId') {
-      setCategoryId(event.target.value);
-      const newSubcategorylist = subcategories.filter(
-        // eslint-disable-next-line eqeqeq
-        (subcategory) => subcategory.parent_id == [event.target.value],
-      );
-      setSubcategoryId(newSubcategorylist[0].id);
-    } else if (event.target.name === 'subcategoryId') {
-      setSubcategoryId(event.target.value);
-    } else if (event.target.name === 'description') {
-      setDescription(event.target.value);
-    } else if (event.target.name === 'amountOut') {
-      setAmountOut(event.target.value);
-    }
+    dispatchTx({ type: event.target.name, value: event.target.value });
   };
-
   // ------------
 
   return (
@@ -266,17 +330,17 @@ const Transactions = () => {
         ? (
           <TransactionsTable
             transactions={transactions}
-            transactionId={transactionId}
-            date={date}
+            transactionId={tx.transactionId}
+            date={tx.date}
             accounts={accounts}
-            accountId={accountId}
-            payee={payee}
+            accountId={tx.accountId}
+            payee={tx.payee}
             categories={categories}
-            categoryId={categoryId}
+            categoryId={tx.categoryId}
             subcategories={subcategories}
-            subcategoryId={subcategoryId}
-            description={description}
-            amountOut={amountOut}
+            subcategoryId={tx.subcategoryId}
+            description={tx.description}
+            amountOut={tx.amountOut}
             adding={adding}
             updating={updating}
             deleting={deleting}
