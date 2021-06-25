@@ -1,5 +1,4 @@
 class Api::AccountsController < ApplicationController
-  skip_before_action :verify_authenticity_token
 
   def index
     accounts = Account.all
@@ -21,11 +20,11 @@ class Api::AccountsController < ApplicationController
     account = Account.find(params['id'])
     if account.update(account_params)
       render json: {
-        data: "Category successfully updated."
+        data: "Account successfully updated."
     }
     else
       render json: {
-        data: "Cannot update."
+        data: account.errors
       }, status: :unprocessable_entity
     end
   end
@@ -34,7 +33,7 @@ class Api::AccountsController < ApplicationController
     account = Account.find(params['id'])
     if account.destroy
       render json: {
-        data: "Category successfully deleted."
+        data: "Account successfully deleted."
       }
     else
       render json: {

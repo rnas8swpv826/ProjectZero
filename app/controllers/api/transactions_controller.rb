@@ -1,12 +1,12 @@
 class Api::TransactionsController < ApplicationController
-  skip_before_action :verify_authenticity_token
 
-  def index # index is a method
+  def index
     transactions = Transaction.all
     categories = Category.all
     transactions_json = transactions.as_json
     transactions.each_with_index do |transaction, index|
-      transactions_json[index]['account_name'] = transaction.account&.name # & is used for safe nav
+      transactions_json[index]['account_name'] = transaction.account&.name
+      # & is used for safe nav, in case a transaction does not have an account
       transactions_json[index]['amount_out'] = '%.2f' %transaction.amount_out
       if transaction.category.parent_id != nil
         parent_id = transaction.category.parent_id
@@ -56,7 +56,7 @@ class Api::TransactionsController < ApplicationController
     }
     else
       render json: {
-        data: "Cannot update."
+        data: transaction.errors
       }, status: :unprocessable_entity
     end
   end
