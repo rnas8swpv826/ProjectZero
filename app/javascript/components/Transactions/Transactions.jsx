@@ -30,87 +30,90 @@ const Transactions = () => {
   };
 
   const txReducer = (state, action) => {
-    if (action.type === 'INIT_ACCOUNT') {
-      return { ...state, accountId: action.value };
-    } if (action.type === 'INIT_CATEGORY') {
-      return {
-        ...state,
-        categoryId: action.value.category,
-        subcategoryId: action.value.category,
-      };
-    } if (action.type === 'UPDATING_CLICK') {
-      return {
-        transactionId: action.value.id,
-        date: action.value.transaction_date,
-        accountId: action.value.account_id,
-        payee: action.value.payee,
-        categoryId: action.value.category_id,
-        subcategoryId: action.value.subcategory_id,
-        description: action.value.description,
-        amountOut: action.value.amount_out,
-      };
-    } if (action.type === 'DATE') {
-      return {
-        ...state,
-        date: action.value,
-      };
-    } if (action.type === 'ACCOUNT_ID') {
-      return {
-        ...state,
-        accountId: action.value,
-      };
-    } if (action.type === 'PAYEE') {
-      return {
-        ...state,
-        payee: action.value,
-      };
-    } if (action.type === 'CATEGORY_ID') {
-      const newSubcategorylist = subcategories.filter(
-        // eslint-disable-next-line eqeqeq
-        (subcategory) => subcategory.parent_id == action.value,
-      );
-      return {
-        ...state,
-        categoryId: action.value,
-        subcategoryId: newSubcategorylist[0].id,
-      };
-    } if (action.type === 'SUBCATEGORY_ID') {
-      return {
-        ...state,
-        subcategoryId: action.value,
-      };
-    } if (action.type === 'DESCRIPTION') {
-      return {
-        ...state,
-        description: action.value,
-      };
-    } if (action.type === 'AMOUNT_OUT') {
-      return {
-        ...state,
-        amountOut: action.value,
-      };
-    } if (action.type === 'RESET') {
-      return {
-        transactionId: '',
-        date: '',
-        accountId: '',
-        payee: '',
-        categoryId: '',
-        subcategoryId: '',
-        description: '',
-        amountOut: '',
-      };
+    switch (action.type) {
+      case 'INIT_ACCOUNT':
+        return { ...state, accountId: action.value };
+      case 'INIT_CATEGORY':
+        return {
+          ...state,
+          categoryId: action.value.category,
+          subcategoryId: action.value.category,
+        };
+      case 'UPDATING_CLICK':
+        return {
+          transactionId: action.value.id,
+          date: action.value.transaction_date,
+          accountId: action.value.account_id,
+          payee: action.value.payee,
+          categoryId: action.value.category_id,
+          subcategoryId: action.value.subcategory_id,
+          description: action.value.description,
+          amountOut: action.value.amount_out,
+        };
+      case 'DATE':
+        return {
+          ...state,
+          date: action.value,
+        };
+      case 'ACCOUNT_ID':
+        return {
+          ...state,
+          accountId: action.value,
+        };
+      case 'PAYEE':
+        return {
+          ...state,
+          payee: action.value,
+        };
+      case 'CATEGORY_ID': {
+        const newSubcategorylist = subcategories.filter(
+          // eslint-disable-next-line eqeqeq
+          (subcategory) => subcategory.parent_id == action.value,
+        );
+        return {
+          ...state,
+          categoryId: action.value,
+          subcategoryId: newSubcategorylist[0].id,
+        };
+      }
+      case 'SUBCATEGORY_ID':
+        return {
+          ...state,
+          subcategoryId: action.value,
+        };
+      case 'DESCRIPTION':
+        return {
+          ...state,
+          description: action.value,
+        };
+      case 'AMOUNT_OUT':
+        return {
+          ...state,
+          amountOut: action.value,
+        };
+      case 'RESET':
+        return {
+          transactionId: '',
+          date: '',
+          accountId: '',
+          payee: '',
+          categoryId: '',
+          subcategoryId: '',
+          description: '',
+          amountOut: '',
+        };
+      default:
+        return {
+          transactionId: '',
+          date: '',
+          accountId: '',
+          payee: '',
+          categoryId: '',
+          subcategoryId: '',
+          description: '',
+          amountOut: '',
+        };
     }
-    return {
-      transactionId: '',
-      date: '',
-      accountId: '',
-      payee: '',
-      categoryId: '',
-      subcategoryId: '',
-      description: '',
-      amountOut: '',
-    };
   };
 
   const [tx, dispatchTx] = useReducer(txReducer, initTx);
