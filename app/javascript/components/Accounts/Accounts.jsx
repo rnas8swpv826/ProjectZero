@@ -141,7 +141,7 @@ const Accounts = () => {
 
       <h2>Existing Accounts</h2>
       {accounts.map((item) => (
-        <Item item={item} onRename={renameHandler} onDelete={deleteHandler} />
+        <Item item={item} key={item.id} onRename={renameHandler} onDelete={deleteHandler} />
       ))}
     </div>
   );
