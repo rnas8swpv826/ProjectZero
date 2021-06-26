@@ -37,7 +37,7 @@ const Transactions = () => {
         return {
           ...state,
           categoryId: action.value.category,
-          subcategoryId: action.value.category,
+          subcategoryId: action.value.subcategory,
         };
       case 'UPDATING_CLICK':
         return {
