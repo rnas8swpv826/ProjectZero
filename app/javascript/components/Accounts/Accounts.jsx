@@ -4,8 +4,8 @@ import React, {
 import { HashLink as Link } from 'react-router-hash-link';
 import $ from 'jquery'; // To remove Modal backdrop
 import useHttpRequest from '../hooks/useHttpRequest';
-import Modal from './Modal';
-import Item from './Item';
+import Modal from '../Shared/Modal';
+import Item from '../Shared/Item';
 
 const Accounts = () => {
   const [accounts, setAccounts] = useState([]);
