@@ -5,13 +5,12 @@ import { HashLink as Link } from 'react-router-hash-link';
 import useHttpRequest from '../hooks/useHttpRequest';
 import TransactionsTable from './TransactionsTable';
 import ButtonsAndErrors from './ButtonsAndErrors';
+import useLoadCategories from '../hooks/useLoadCategories';
 
 const Transactions = () => {
   // Table Data
   const [transactions, setTransactions] = useState([]);
   const [accounts, setAccounts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [subcategories, setSubcategories] = useState([]);
   // Other States
   const [messages, setMessages] = useState([]);
   const [adding, setAdding] = useState(false);
@@ -19,14 +18,20 @@ const Transactions = () => {
   const [deleting, setDeleting] = useState(false);
   const [selectedRows, setSelectedRows] = useState([]);
 
+  // ---- Load Categories and Subcategories ----
+  const {
+    getLoadCategories, categories, subcategories, firstCategory, firstSubcategory,
+  } = useLoadCategories();
+  // ------------
+
   // ---- Reducer for transaction (tx for short) ----
   const initTx = {
     transactionId: '',
     date: '',
     accountId: '',
     payee: '',
-    categoryId: '',
-    subcategoryId: '',
+    categoryId: firstCategory,
+    subcategoryId: firstSubcategory,
     description: '',
     amountOut: '',
   };
@@ -35,12 +40,6 @@ const Transactions = () => {
     switch (action.type) {
       case 'INIT_ACCOUNT':
         return { ...state, accountId: action.value };
-      case 'INIT_CATEGORY':
-        return {
-          ...state,
-          categoryId: action.value.category,
-          subcategoryId: action.value.subcategory,
-        };
       case 'UPDATING_CLICK':
         return {
           transactionId: action.value.id,
@@ -99,8 +98,8 @@ const Transactions = () => {
           date: '',
           accountId: '',
           payee: '',
-          categoryId: '',
-          subcategoryId: '',
+          categoryId: firstCategory,
+          subcategoryId: firstSubcategory,
           description: '',
           amountOut: '',
         };
@@ -110,8 +109,8 @@ const Transactions = () => {
           date: '',
           accountId: '',
           payee: '',
-          categoryId: '',
-          subcategoryId: '',
+          categoryId: state.categoryId,
+          subcategoryId: state.subcategoryId,
           description: '',
           amountOut: '',
         };
@@ -121,7 +120,7 @@ const Transactions = () => {
   const [tx, dispatchTx] = useReducer(txReducer, initTx);
   // ------------
 
-  // ---- Load Transactions, Accounts and Categories ----
+  // ---- Load Transactions and Accounts ----
   const { isLoading, errors, sendRequest } = useHttpRequest();
 
   const loadTransactions = useCallback(() => {
@@ -147,44 +146,11 @@ const Transactions = () => {
     );
   }, [sendRequest]);
 
-  const loadCategories = useCallback(() => {
-    const getCategoriesData = (data) => {
-      const cat = [];
-      const subcat = [];
-      data.forEach((category) => {
-        if (category.parent_id == null) {
-          cat.push(category);
-        } else {
-          subcat.push(category);
-        }
-      });
-      let firstCategory = '';
-      if (cat.length > 0) {
-        firstCategory = cat[0].id;
-      }
-      let firstSubcategory = '';
-      if (subcat.length > 0) {
-        firstSubcategory = subcat[0].id;
-      }
-      setCategories(cat);
-      setSubcategories(subcat);
-      dispatchTx({
-        type: 'INIT_CATEGORY',
-        value: { category: firstCategory, subcategory: firstSubcategory },
-      });
-    };
-
-    sendRequest(
-      { url: 'api/categories' },
-      getCategoriesData,
-    );
-  }, [sendRequest]);
-
   useEffect(() => {
     loadTransactions();
     loadAccounts();
-    loadCategories();
-  }, [loadTransactions, loadAccounts, loadCategories]);
+    getLoadCategories();
+  }, [loadTransactions, loadAccounts, getLoadCategories]);
   // ------------
 
   // ---- Reset transaction in memory after successful request or cancellation ----
@@ -192,7 +158,7 @@ const Transactions = () => {
     setMessages([]);
     dispatchTx({ type: 'RESET' });
     loadAccounts();
-    loadCategories();
+    getLoadCategories();
   };
   // ------------
 
