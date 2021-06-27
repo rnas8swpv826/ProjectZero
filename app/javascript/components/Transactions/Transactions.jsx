@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useReducer } from 'react';
+import React, {
+  useEffect, useState, useReducer, useCallback,
+} from 'react';
 import { HashLink as Link } from 'react-router-hash-link';
 import useHttpRequest from '../hooks/useHttpRequest';
 import TransactionsTable from './TransactionsTable';
@@ -120,69 +122,77 @@ const Transactions = () => {
   // ------------
 
   // ---- Load Transactions, Accounts and Categories ----
-  const loadTransactions = useHttpRequest(
-    { url: '/api/transactions' },
-    (data) => setTransactions(data),
-  );
+  const { isLoading, errors, sendRequest } = useHttpRequest();
 
-  const getAccountsData = (data) => {
-    let firstAccount = '';
-    if (data.length > 0) {
-      firstAccount = data[0].id;
-    }
-    dispatchTx({ type: 'INIT_ACCOUNT', value: firstAccount });
-    setAccounts(data);
-  };
+  const loadTransactions = useCallback(() => {
+    sendRequest(
+      { url: '/api/transactions' },
+      (data) => setTransactions(data),
+    );
+  }, [sendRequest]);
 
-  const loadAccounts = useHttpRequest(
-    { url: 'api/accounts' },
-    getAccountsData,
-  );
-
-  const getCategoriesData = (data) => {
-    const cat = [];
-    const subcat = [];
-    data.forEach((category) => {
-      if (category.parent_id == null) {
-        cat.push(category);
-      } else {
-        subcat.push(category);
+  const loadAccounts = useCallback(() => {
+    const getAccountsData = (data) => {
+      let firstAccount = '';
+      if (data.length > 0) {
+        firstAccount = data[0].id;
       }
-    });
-    let firstCategory = '';
-    if (cat.length > 0) {
-      firstCategory = cat[0].id;
-    }
-    let firstSubcategory = '';
-    if (subcat.length > 0) {
-      firstSubcategory = subcat[0].id;
-    }
-    setCategories(cat);
-    setSubcategories(subcat);
-    dispatchTx({
-      type: 'INIT_CATEGORY',
-      value: { category: firstCategory, subcategory: firstSubcategory },
-    });
-  };
+      dispatchTx({ type: 'INIT_ACCOUNT', value: firstAccount });
+      setAccounts(data);
+    };
 
-  const loadCategories = useHttpRequest(
-    { url: 'api/categories' },
-    getCategoriesData,
-  );
+    sendRequest(
+      { url: 'api/accounts' },
+      getAccountsData,
+    );
+  }, [sendRequest]);
+
+  const loadCategories = useCallback(() => {
+    const getCategoriesData = (data) => {
+      const cat = [];
+      const subcat = [];
+      data.forEach((category) => {
+        if (category.parent_id == null) {
+          cat.push(category);
+        } else {
+          subcat.push(category);
+        }
+      });
+      let firstCategory = '';
+      if (cat.length > 0) {
+        firstCategory = cat[0].id;
+      }
+      let firstSubcategory = '';
+      if (subcat.length > 0) {
+        firstSubcategory = subcat[0].id;
+      }
+      setCategories(cat);
+      setSubcategories(subcat);
+      dispatchTx({
+        type: 'INIT_CATEGORY',
+        value: { category: firstCategory, subcategory: firstSubcategory },
+      });
+    };
+
+    sendRequest(
+      { url: 'api/categories' },
+      getCategoriesData,
+    );
+  }, [sendRequest]);
 
   useEffect(() => {
-    loadTransactions.sendRequest();
-    loadAccounts.sendRequest();
-    loadCategories.sendRequest();
-  }, []);
+    loadTransactions();
+    loadAccounts();
+    loadCategories();
+  }, [loadTransactions, loadAccounts, loadCategories]);
   // ------------
 
   // ---- Reset transaction in memory after successful request or cancellation ----
   const resetTxInMemory = () => {
     setMessages([]);
     dispatchTx({ type: 'RESET' });
-    loadAccounts.sendRequest();
-    loadCategories.sendRequest();
+    loadAccounts();
+    loadCategories();
   };
   // ------------
 
@@ -204,29 +214,29 @@ const Transactions = () => {
   };
 
   const successfulAddUpdateTransaction = () => {
-    loadTransactions.sendRequest();
+    loadTransactions();
     resetTxInMemory();
     setAdding(false);
     setUpdating(false);
   };
 
-  const addTransaction = useHttpRequest(
-    { url: '/api/transactions', method: 'POST', body: bodyRequest },
-    successfulAddUpdateTransaction,
-  );
+  const addTransaction = () => {
+    sendRequest(
+      { url: '/api/transactions', method: 'POST', body: bodyRequest },
+      successfulAddUpdateTransaction,
+    );
+  };
 
-  const updateTransaction = useHttpRequest(
-    { url: `/api/transactions/${tx.transactionId}`, method: 'PATCH', body: bodyRequest },
-    successfulAddUpdateTransaction,
-  );
+  const updateTransaction = () => {
+    sendRequest(
+      { url: `/api/transactions/${tx.transactionId}`, method: 'PATCH', body: bodyRequest },
+      successfulAddUpdateTransaction,
+    );
+  };
 
   useEffect(() => {
-    setMessages(addTransaction.errors);
-  }, [addTransaction.errors]);
-
-  useEffect(() => {
-    setMessages(updateTransaction.errors);
-  }, [updateTransaction.errors]);
+    setMessages(errors);
+  }, [errors]);
   // Sets error messages if transaction adding or updating is not sucessful.
   // The adding, updating & table data states remain unchanged
   // so that the user can correct the issue.
@@ -266,14 +276,16 @@ const Transactions = () => {
 
   const successfulDeleteTransaction = () => {
     setDeleting(false);
-    loadTransactions.sendRequest();
+    loadTransactions();
     resetTxInMemory();
   };
 
-  const deleteTransactions = useHttpRequest(
-    { url: '/api/transactions', method: 'DELETE', body: bodyDeleteRequest },
-    successfulDeleteTransaction,
-  );
+  const deleteTransactions = () => {
+    sendRequest(
+      { url: '/api/transactions', method: 'DELETE', body: bodyDeleteRequest },
+      successfulDeleteTransaction,
+    );
+  };
   // ------------
 
   // ---- Save and Cancel Button Handlers ----
@@ -294,14 +306,14 @@ const Transactions = () => {
 
   const saveClickHandler = () => {
     if (adding) {
-      addTransaction.sendRequest();
+      addTransaction();
     } else if (updating) {
-      updateTransaction.sendRequest();
+      updateTransaction();
     } else if (deleting) {
       if (selectedRows.length === 0) {
         setMessages(['No transactions selected']);
       } else {
-        deleteTransactions.sendRequest();
+        deleteTransactions();
         setMessages([]);
         setDeleting(false);
       }
@@ -325,8 +337,8 @@ const Transactions = () => {
         Delete Transactions
       </button>
       <Link to="/" className="btn btn-outline-primary">Back to Home</Link>
-      {loadTransactions.isLoading && <p>Transactions are loading.</p>}
-      {transactions.length > 0 && !loadTransactions.isLoading
+      {isLoading && <p>Transactions are loading.</p>}
+      {transactions.length > 0 && !isLoading
         ? (
           <TransactionsTable
             transactions={transactions}
