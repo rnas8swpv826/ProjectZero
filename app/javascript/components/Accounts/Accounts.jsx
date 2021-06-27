@@ -1,4 +1,6 @@
-import React, { useEffect, useState, useReducer } from 'react';
+import React, {
+  useEffect, useState, useReducer, useCallback,
+} from 'react';
 import { HashLink as Link } from 'react-router-hash-link';
 import $ from 'jquery'; // To remove Modal backdrop
 import useHttpRequest from '../hooks/useHttpRequest';
@@ -37,30 +39,36 @@ const Accounts = () => {
   // ------------
 
   // ---- Load existing accounts ----
-  const loadAccounts = useHttpRequest(
-    { url: 'api/accounts' },
-    (data) => setAccounts(data),
-  );
+  const { sendRequest, errors } = useHttpRequest();
+
+  const loadAccounts = useCallback(() => {
+    sendRequest(
+      { url: 'api/accounts' },
+      (data) => setAccounts(data),
+    );
+  }, [sendRequest]);
 
   useEffect(() => {
-    loadAccounts.sendRequest();
-  }, []);
+    loadAccounts();
+  }, [loadAccounts]);
   // ------------
 
   // ---- Add new account ----
   const successfulAddRenameAccount = () => {
-    loadAccounts.sendRequest();
+    loadAccounts();
     dispatchAccount({ type: 'RESET' });
   };
 
-  const addAccount = useHttpRequest(
-    { url: 'api/accounts', method: 'POST', body: account },
-    successfulAddRenameAccount,
-  );
+  const addAccount = () => {
+    sendRequest(
+      { url: 'api/accounts', method: 'POST', body: account },
+      successfulAddRenameAccount,
+    );
+  };
 
   useEffect(() => {
-    setMessages(addAccount.errors);
-  }, [addAccount.errors]);
+    setMessages(errors);
+  }, [errors]);
   // ------------
 
   // ---- Rename an existing account ----
@@ -72,14 +80,12 @@ const Accounts = () => {
     dispatchAccount({ type: 'RENAME', value: item });
   };
 
-  const renameAccount = useHttpRequest(
-    { url: `/api/accounts/${account.id}`, method: 'PATCH', body: account },
-    successfulAddRenameAccount,
-  );
-
-  useEffect(() => {
-    setMessages(renameAccount.errors);
-  }, [renameAccount.errors]);
+  const renameAccount = () => {
+    sendRequest(
+      { url: `/api/accounts/${account.id}`, method: 'PATCH', body: account },
+      successfulAddRenameAccount,
+    );
+  };
   // ------------
 
   // ---- Delete an account ----
@@ -87,13 +93,15 @@ const Accounts = () => {
     $('#deleteConfirmation').modal('hide'); // Remove Modal backdrop
     setDisplayModal(false);
     dispatchAccount({ type: 'RESET' });
-    loadAccounts.sendRequest();
+    loadAccounts();
   };
 
-  const deleteAccount = useHttpRequest(
-    { url: `/api/accounts/${account.id}`, method: 'DELETE', body: account },
-    successfulDeleteAccount,
-  );
+  const deleteAccount = () => {
+    sendRequest(
+      { url: `/api/accounts/${account.id}`, method: 'DELETE', body: account },
+      successfulDeleteAccount,
+    );
+  };
 
   const deleteHandler = (item) => {
     dispatchAccount({ type: 'DELETE', value: item });
@@ -106,7 +114,7 @@ const Accounts = () => {
         && (
         <Modal
           name={account.name}
-          onDeleteConfirmation={() => deleteAccount.sendRequest()}
+          onDeleteConfirmation={deleteAccount}
         />
         )}
       <h2>Add a New Account</h2>
@@ -121,14 +129,14 @@ const Accounts = () => {
       <h6 className="text-danger">{messages.join('. ')}</h6>
       {adding
         && (
-        <button type="button" className="btn btn-primary" onClick={() => addAccount.sendRequest()}>
+        <button type="button" className="btn btn-primary" onClick={addAccount}>
           Add Account
         </button>
         )}
       {renaming
         && (
           <>
-            <button type="button" className="btn btn-primary" onClick={() => renameAccount.sendRequest()}>
+            <button type="button" className="btn btn-primary" onClick={renameAccount}>
               Save
             </button>
             <button type="button" className="btn btn-secondary" onClick={cancelRenameHandler}>

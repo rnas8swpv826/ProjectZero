@@ -1,14 +1,15 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
-const useHttpRequest = (requestParams, dataTransformation) => {
+const useHttpRequest = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState([]);
-  const { url, method, body } = requestParams;
 
-  const sendRequest = async () => {
+  const sendRequest = useCallback(async (requestParams, dataTransformation) => {
     setIsLoading(true);
     setErrors([]);
+    const { url, method, body } = requestParams;
     const token = document.querySelector("meta[name='csrf-token']").content;
+
     try {
       const response = await fetch(
         url, {
@@ -47,7 +48,7 @@ const useHttpRequest = (requestParams, dataTransformation) => {
       });
     }
     setIsLoading(false);
-  };
+  }, []);
 
   return {
     isLoading,
